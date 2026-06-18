@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sunset Glow 🌅</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;overflow:hidden;font-family:system-ui;background:#0a0315;color:#fff}
+    #g{position:fixed;inset:0;display:block}
+    #ui{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;pointer-events:none;z-index:10}
+    h1{font-size:clamp(24px,8vw,48px);font-weight:900;margin-bottom:8px;text-shadow:0 0 20px rgba(255,255,255,.3)}
+    #score{font-size:clamp(32px,12vw,80px);font-weight:900;color:#fff;text-shadow:0 0 30px #ff6b35}
+    #best{color:rgba(255,255,255,.6);font-size:14px;letter-spacing:2px}
+    .btn{background:linear-gradient(135deg,#ff6b35,#ffc107);color:#0a0315;border:none;padding:12px 32px;border-radius:30px;font-weight:900;font-size:16px;cursor:pointer;margin-top:20px;pointer-events:auto;transition:transform .1s,box-shadow .2s}
+    .btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(255,107,53,.5)}
+    #gameover{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:20;overflow:auto;padding:24px 0}
+    #learn2{display:none;width:min(90vw,420px);margin:6px auto 16px;text-align:left}
+    .c2{background:rgba(255,150,60,.10);border:1px solid rgba(255,160,70,.28);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+    .c2-t{font-size:12px;letter-spacing:2px;color:#ffc107;font-weight:900;margin-bottom:8px}
+    #fact2{font-size:14px;line-height:1.5;color:rgba(255,255,255,.9);font-weight:400}
+    #fact2 b{color:#ffd60a}
+    .r2{margin:12px 0 2px}
+    .r2-top{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:#fff}
+    .r2-top .v{color:#ffc107}
+    .r2 input[type=range]{width:100%;margin-top:6px;accent-color:#ff6b35;cursor:pointer}
+    .r2 select{width:100%;margin-top:6px;padding:8px 10px;border-radius:9px;background:#2a1505;color:#fff;border:1px solid rgba(255,160,70,.4);font-weight:700;font-size:13px;cursor:pointer}
+    .h2hint{font-size:11px;line-height:1.4;color:rgba(255,255,255,.5);margin-top:6px;font-weight:400}
+  </style>
+</head>
+<body>
+  <a href="../index.html" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(0,0,0,.45);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:7px 14px;border-radius:20px;backdrop-filter:blur(8px)">← HOME</a>
+
+  <canvas id="g"></canvas>
+  <div id="ui">
+    <h1>🌅 Sunset Glow</h1>
+    <div id="score">0</div>
+    <div id="best">BEST: 0</div>
+    <button class="btn" id="start">START</button>
+  </div>
+  <div id="gameover">
+    <div style="text-align:center">
+      <h2 style="margin-bottom:10px">GAME OVER</h2>
+      <div id="final" style="font-size:24px;margin-bottom:16px">SCORE: 0</div>
+      <div id="learn2">
+        <div class="c2"><div class="c2-t">🌅 SUNSET SCIENCE</div><div id="fact2"></div></div>
+        <div class="c2">
+          <div class="c2-t">🎛️ TWEAK IT &amp; PLAY AGAIN</div>
+          <div class="r2">
+            <div class="r2-top"><span>🌍 Fall Speed (gravity)</span><span class="v" id="fsVal">1.0×</span></div>
+            <input type="range" id="fsSlider" min="0.5" max="2.5" step="0.1" value="1">
+            <div class="h2hint">Gravity is what pulls the orbs down. More gravity = faster fall = <b>less time</b> to tap each one.</div>
+          </div>
+          <div class="r2">
+            <div class="r2-top"><span>🎲 Bomb Chance (probability)</span></div>
+            <select id="bombSel">
+              <option value="0.04">Chill — few bombs</option>
+              <option value="0.09" selected>Normal</option>
+              <option value="0.18">Risky — lots of bombs</option>
+            </select>
+            <div class="h2hint">Probability is the <b>chance</b> something happens. Crank this up and more 💣 appear in the mix.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="restart">PLAY AGAIN</button>
+    </div>
+  </div>
+  <script>
+    const g=document.getElementById('g');const c=g.getContext('2d');
+    let w=innerWidth,h=innerHeight;
+    function resize(){w=innerWidth;h=innerHeight;g.width=w;g.height=h}
+    resize();addEventListener('resize',resize);
+    const colors=['#ff6b35','#ffa726','#ffcc00','#fff176','#ffd60a'];
+    let cfgFallSpeed=1,cfgBombChance=0.09;
+    const FACTS2=["🌅 Why is a sunset orange? Sunlight is really made of <b>many colors</b> mixed together. When the sun is low, its light travels through more air, which scatters the blue light away and lets the warm orange and red colors reach your eyes. That's called <b>scattering</b>.","🌍 <b>Gravity</b> is the invisible pull that makes the orbs fall down. On Earth, falling things keep speeding up. The higher you set the fall speed, the less time you get to tap each orb!","🎲 <b>Probability</b> is the chance that something will happen. If you set bombs to 'Risky', a bigger share of the falling orbs become bombs — so the odds of a 💣 go way up. Weather forecasters use probability every day.","👁️ Your eyes have tiny cells called <b>cones</b> that see color and <b>rods</b> that see in dim light. A sunset looks extra glowy because both kinds are working at the same time in the low light.","⚡ Tapping the right orb fast is <b>hand-eye coordination</b> — how well your eyes guide your hands. Athletes and pilots train this so they can react in a split second."];
+    let state={score:0,best:localStorage.getItem('sg_best')|0,running:false,rays:[],particles:[],floaters:[],spawnTimer:0,spawnInterval:55,combo:0,mult:1,frenzy:0,slow:0};
+    function start(){state.score=0;state.rays=[];state.particles=[];state.floaters=[];state.running=true;state.spawnTimer=0;state.spawnInterval=55;state.combo=0;state.mult=1;state.frenzy=0;state.slow=0;document.getElementById('gameover').style.display='none';document.getElementById('ui').style.display='none';}
+    function pickType(){if(Math.random()<cfgBombChance)return 'bomb';const r=Math.random();if(r<.13)return 'gem';if(r<.23)return 'star';if(r<.32)return 'time';return 'normal';}
+    function spawnRay(){const x=Math.random()*(w-80)+40;const type=pickType();let size,color,emoji='',pts=10;if(type==='gem'){size=26;color='#00e5ff';emoji='💎';pts=50;}else if(type==='star'){size=28;color='#ffd60a';emoji='⭐';pts=20;}else if(type==='time'){size=26;color='#7df9ff';emoji='🕐';pts=15;}else if(type==='bomb'){size=28;color='#1a1a22';emoji='💣';pts=0;}else{size=Math.random()*30+40;color=`hsl(${Math.floor(Math.random()*30)+20},100%,55%)`;pts=10;}state.rays.push({x:x,baseX:x,y:-20,size:size,type:type,emoji:emoji,pts:pts,speed:(2+Math.random()*2)*cfgFallSpeed,drift:18+Math.random()*22,phase:Math.random()*6.3,color:color,targetY:h-40+Math.random()*40});}
+    function showFloat(x,y,text,color){state.floaters.push({x:x,y:y,text:text,color:color,life:50});}
+    function spawnParticles(x,y,color){for(let i=0;i<15;i++){state.particles.push({x:x,y:y,vx:(Math.random()-.5)*8,vy:(Math.random()-.5)*8,life:30,color:color,alpha:1});}}
+    function hit(x,y){for(let i=state.rays.length-1;i>=0;i--){const r=state.rays[i];const dist=Math.hypot(x-r.x,y-r.y);if(dist<r.size+16){if(r.type==='bomb'){state.rays.splice(i,1);spawnParticles(r.x,r.y,'#ff3b30');spawnParticles(r.x,r.y,'#660000');return bombHit();}state.combo++;state.mult=Math.min(1+Math.floor(state.combo/5),5);const fr=state.frenzy>0?2:1;const gain=r.pts*state.mult*fr;state.score+=gain;spawnParticles(r.x,r.y,r.color);spawnParticles(r.x,r.y,'#fff');showFloat(r.x,r.y,'+'+gain,r.color);if(r.type==='star'){state.frenzy=300;showFloat(w/2,h*.35,'🔥 FRENZY x2!','#ffd60a');}else if(r.type==='time'){state.slow=240;showFloat(w/2,h*.35,'🕐 SLOW-MO!','#7df9ff');}else if(r.type==='gem'){spawnParticles(r.x,r.y,'#00e5ff');showFloat(r.x,r.y-30,'💎 GEM!','#00e5ff');}if(state.combo>0&&state.combo%5===0)showFloat(w/2,h*.45,'COMBO x'+state.mult+'!','#ff6b35');state.rays.splice(i,1);return true;}}return false;}
+    function bombHit(){gameOver('💣 BOOM!');return true;}
+    function update(){if(!state.running)return;if(state.frenzy>0)state.frenzy--;if(state.slow>0)state.slow--;const slowF=state.slow>0?.45:1;if(--state.spawnTimer<=0){spawnRay();state.spawnInterval=Math.max(22,55-state.score*.01);state.spawnTimer=state.spawnInterval;}for(let i=state.rays.length-1;i>=0;i--){const r=state.rays[i];r.y+=r.speed*slowF;r.x=Math.max(20,Math.min(w-20,r.baseX+Math.sin(r.y/55+r.phase)*r.drift));if(r.y>r.targetY+60){state.rays.splice(i,1);if(r.type==='bomb'){state.combo=0;state.mult=1;}else gameOver();}}for(let i=state.particles.length-1;i>=0;i--){const p=state.particles[i];p.x+=p.vx;p.y+=p.vy;p.life--;p.alpha=p.life/30;if(p.life<=0)state.particles.splice(i,1);}for(let i=state.floaters.length-1;i>=0;i--){const f=state.floaters[i];f.y-=1.2;f.life--;if(f.life<=0)state.floaters.splice(i,1);}}
+    function gameOver(msg){if(!state.running)return;state.running=false;document.querySelector('#gameover h2').textContent=msg||'GAME OVER';if(state.score>state.best){state.best=state.score;localStorage.setItem('sg_best',state.best)}document.getElementById('final').textContent=`SCORE: ${state.score}`;document.getElementById('fact2').innerHTML=FACTS2[Math.floor(Math.random()*FACTS2.length)];const fs=document.getElementById('fsSlider');fs.value=cfgFallSpeed;document.getElementById('fsVal').textContent=(+cfgFallSpeed).toFixed(1)+'×';document.getElementById('bombSel').value=String(cfgBombChance);document.getElementById('learn2').style.display='block';document.getElementById('gameover').style.display='flex';document.getElementById('ui').style.display='none';}
+    function draw(){const t=Date.now()/1000;const spd=state.frenzy>0?42:14;const hueA=(t*spd)%360,hueB=(t*spd+50)%360;const sky=c.createLinearGradient(0,0,0,h);sky.addColorStop(0,'#08020f');sky.addColorStop(.55,`hsl(${(260+Math.sin(t*.3)*30+360)%360},45%,9%)`);sky.addColorStop(.80,`hsl(${hueA},85%,42%)`);sky.addColorStop(1,`hsl(${hueB},95%,58%)`);c.fillStyle=sky;c.fillRect(0,0,w,h);c.fillStyle='rgba(0,0,0,.55)';c.fillRect(0,h-30,w,30);c.fillStyle=`hsla(${hueA},100%,75%,.35)`;c.fillRect(0,h-32,w,2);for(const r of state.rays){c.save();c.translate(r.x,r.y);const gr=c.createRadialGradient(0,0,0,0,0,r.size);gr.addColorStop(0,r.color);gr.addColorStop(1,'#fff0');c.fillStyle=gr;c.beginPath();c.arc(0,0,r.size,0,6.3);c.fill();if(r.emoji){c.font=`${Math.round(r.size*1.1)}px system-ui`;c.textAlign='center';c.textBaseline='middle';c.fillText(r.emoji,0,0);}c.restore();}c.textBaseline='alphabetic';for(const p of state.particles){c.globalAlpha=p.alpha;c.fillStyle=p.color;c.beginPath();c.arc(p.x,p.y,3,0,6.3);c.fill();}c.globalAlpha=1;for(const f of state.floaters){c.globalAlpha=Math.min(1,f.life/25);c.fillStyle=f.color;c.font='bold 22px system-ui';c.textAlign='center';c.fillText(f.text,f.x,f.y);}c.globalAlpha=1;const sunR=34+Math.sin(t*2)*5;const sg=c.createRadialGradient(w/2,h-30,0,w/2,h-30,sunR*2.4);sg.addColorStop(0,`hsl(${hueA},100%,72%)`);sg.addColorStop(.5,`hsl(${hueB},95%,55%)`);sg.addColorStop(1,'#fff0');c.fillStyle=sg;c.beginPath();c.arc(w/2,h-30,sunR*2.4,0,6.3);c.fill();c.fillStyle='#fff';c.font='bold 18px system-ui';c.textAlign='center';c.fillText(`SCORE: ${state.score}`,w/2,32);if(state.mult>1){c.fillStyle='#ffd60a';c.font='bold 15px system-ui';c.fillText(`COMBO x${state.mult}`,w/2,54);}if(state.frenzy>0){c.fillStyle='#ff6b35';c.textAlign='left';c.fillText('🔥 FRENZY',14,30);}if(state.slow>0){c.fillStyle='#7df9ff';c.textAlign='right';c.fillText('🕐 SLOW-MO',w-14,30);}if(state.frenzy>0){c.fillStyle=`rgba(255,107,53,${.04+Math.sin(Date.now()/120)*.03})`;c.fillRect(0,0,w,h);}}
+    function loop(){update();draw();requestAnimationFrame(loop);}
+    requestAnimationFrame(loop);
+    g.addEventListener('click',e=>{if(state.running)hit(e.clientX,e.clientY)});
+    g.addEventListener('touchstart',e=>{if(!state.running)return;e.preventDefault();const t=e.changedTouches[0];const rect=g.getBoundingClientRect();hit(t.clientX-rect.left,t.clientY-rect.top);},{passive:false});
+    document.getElementById('fsSlider').addEventListener('input',e=>{document.getElementById('fsVal').textContent=(+e.target.value).toFixed(1)+'×';});
+    document.getElementById('start').onclick=()=>start();
+    document.getElementById('restart').onclick=()=>{cfgFallSpeed=+document.getElementById('fsSlider').value;cfgBombChance=+document.getElementById('bombSel').value;document.getElementById('gameover').style.display='none';document.getElementById('learn2').style.display='none';start();};
+  </script>
+</body>
+</html>

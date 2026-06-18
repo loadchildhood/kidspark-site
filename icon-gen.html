@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KidSpark Icon Generator</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:system-ui;background:#050815;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;text-align:center}
+    h1{font-size:28px;font-weight:900;margin-bottom:8px;background:linear-gradient(90deg,#00e5ff,#a259ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+    p{color:rgba(255,255,255,.55);font-size:14px;margin-bottom:32px;max-width:500px;line-height:1.6}
+    .canvases{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+    .icon-wrap{text-align:center}
+    canvas{display:block;border-radius:18px;box-shadow:0 8px 40px rgba(0,229,255,.2)}
+    .size-label{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:2px;margin-top:10px}
+    .btn{background:linear-gradient(135deg,#00e5ff,#a259ff);color:#050815;border:none;padding:12px 28px;border-radius:24px;font-weight:900;font-size:14px;cursor:pointer;margin:6px;letter-spacing:.06em;transition:transform .1s}
+    .btn:hover{transform:scale(1.04)}
+    .step{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px 22px;margin:8px 0;max-width:520px;text-align:left;font-size:14px;color:rgba(255,255,255,.7);line-height:1.6}
+    .step strong{color:#00e5ff}
+    a{color:rgba(255,255,255,.45);font-size:13px;display:block;margin-top:20px}
+    a:hover{color:#fff}
+  </style>
+</head>
+<body>
+  <h1>KidSpark Icon Generator</h1>
+  <p>This page generates the PNG icons required by the Web App Manifest and Google Play.<br>Download both sizes and save them to the <code>icons/</code> folder.</p>
+
+  <div class="canvases">
+    <div class="icon-wrap">
+      <canvas id="c512" width="512" height="512"></canvas>
+      <div class="size-label">512 × 512</div>
+      <button class="btn" onclick="download('c512','icon-512.png')">⬇ Download icon-512.png</button>
+    </div>
+    <div class="icon-wrap">
+      <canvas id="c192" width="192" height="192"></canvas>
+      <div class="size-label">192 × 192</div>
+      <button class="btn" onclick="download('c192','icon-192.png')">⬇ Download icon-192.png</button>
+    </div>
+  </div>
+
+  <div class="step"><strong>Step 1:</strong> Click both download buttons above.</div>
+  <div class="step"><strong>Step 2:</strong> Move both downloaded files into the <code>icons/</code> folder of your kidspark-site directory.</div>
+  <div class="step"><strong>Step 3:</strong> Commit and push to GitHub — your PWA will now show the icon on home screens and in the Play Store.</div>
+  <div class="step"><strong>Step 4:</strong> For the Play Store, also upload <code>icon-512.png</code> as your Hi-res icon and Feature Graphic in the Play Console.</div>
+
+  <a href="index.html">← Back to KidSpark</a>
+
+  <script>
+function drawIcon(canvas){
+  const S = canvas.width;
+  const ctx = canvas.getContext('2d');
+  const cx = S/2, cy = S/2;
+  const TAU = Math.PI*2;
+
+  // Background
+  ctx.fillStyle='#050815';
+  ctx.roundRect(0,0,S,S, S*0.188);
+  ctx.fill();
+
+  // Soft outer glow
+  const glow = ctx.createRadialGradient(cx,cy,0,cx,cy,S*0.42);
+  glow.addColorStop(0,'rgba(0,229,255,0.18)');
+  glow.addColorStop(0.5,'rgba(162,89,255,0.10)');
+  glow.addColorStop(1,'rgba(162,89,255,0)');
+  ctx.fillStyle=glow;
+  ctx.fillRect(0,0,S,S);
+
+  // 4-pointed star (main)
+  const g1=ctx.createLinearGradient(0,0,S,S);
+  g1.addColorStop(0,'#00e5ff');
+  g1.addColorStop(0.6,'#a259ff');
+  g1.addColorStop(1,'#ff4ecd');
+
+  ctx.save();
+  ctx.shadowColor='#00e5ff';
+  ctx.shadowBlur=S*0.06;
+  ctx.fillStyle=g1;
+  ctx.beginPath();
+  const tip=S*0.14, ctrl=S*0.50, inner=S*0.16;
+  // top
+  ctx.moveTo(cx,tip);
+  ctx.bezierCurveTo(cx+inner,cy-inner,cx+inner,cy-inner,S-tip,cy);
+  ctx.bezierCurveTo(cx+inner,cy+inner,cx+inner,cy+inner,cx,S-tip);
+  ctx.bezierCurveTo(cx-inner,cy+inner,cx-inner,cy+inner,tip,cy);
+  ctx.bezierCurveTo(cx-inner,cy-inner,cx-inner,cy-inner,cx,tip);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Secondary inner spark (white, rotated 45deg)
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.rotate(Math.PI/4);
+  const g2=ctx.createRadialGradient(0,0,0,0,0,S*0.24);
+  g2.addColorStop(0,'rgba(255,255,255,0.28)');
+  g2.addColorStop(1,'rgba(255,255,255,0)');
+  ctx.fillStyle=g2;
+  const r2=S*0.21, r2i=S*0.04;
+  ctx.beginPath();
+  ctx.moveTo(0,-r2);
+  ctx.bezierCurveTo(r2i,-r2i,r2i,-r2i,r2,0);
+  ctx.bezierCurveTo(r2i,r2i,r2i,r2i,0,r2);
+  ctx.bezierCurveTo(-r2i,r2i,-r2i,r2i,-r2,0);
+  ctx.bezierCurveTo(-r2i,-r2i,-r2i,-r2i,0,-r2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  // Bright center dot
+  ctx.save();
+  ctx.shadowColor='#ffffff';
+  ctx.shadowBlur=S*0.04;
+  const dotG=ctx.createRadialGradient(cx,cy,0,cx,cy,S*0.06);
+  dotG.addColorStop(0,'#ffffff');
+  dotG.addColorStop(1,'rgba(255,255,255,0.6)');
+  ctx.fillStyle=dotG;
+  ctx.beginPath();
+  ctx.arc(cx,cy,S*0.05,0,TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Draw on both canvases
+const c512 = document.getElementById('c512');
+const c192 = document.getElementById('c192');
+drawIcon(c512);
+drawIcon(c192);
+
+function download(id, filename){
+  const canvas = document.getElementById(id);
+  const a = document.createElement('a');
+  a.download = filename;
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+  </script>
+</body>
+</html>

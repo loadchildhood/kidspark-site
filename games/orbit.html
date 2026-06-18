@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>ORBIT</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#05030f;color:#fff;font-family:system-ui,-apple-system,sans-serif;touch-action:none;user-select:none}
+  #c{position:fixed;inset:0;display:block}
+  .ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;z-index:10;padding:24px}
+  #go{display:none;background:rgba(5,3,15,.72);backdrop-filter:blur(3px)}
+  h1{font-size:clamp(40px,16vw,96px);font-weight:900;letter-spacing:.12em;background:linear-gradient(90deg,#00f2fe,#a259ff,#ff4ecd);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 24px rgba(120,80,255,.55))}
+  .sub{margin-top:10px;opacity:.7;font-size:clamp(13px,3.6vw,17px);line-height:1.5;max-width:340px}
+  .hint{margin-top:6px;opacity:.5;font-size:13px;letter-spacing:.18em}
+  h2{font-size:clamp(28px,9vw,52px);font-weight:900;color:#ff4ecd;filter:drop-shadow(0 0 18px rgba(255,78,205,.6))}
+  .big{font-size:clamp(44px,18vw,110px);font-weight:900;margin:4px 0;background:linear-gradient(90deg,#00f2fe,#ffd60a);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .best{opacity:.65;letter-spacing:.22em;font-size:14px}
+  .btn{margin-top:26px;pointer-events:auto;cursor:pointer;border:none;padding:16px 46px;border-radius:40px;font-weight:900;font-size:18px;letter-spacing:.08em;color:#05030f;background:linear-gradient(135deg,#00f2fe,#a259ff);box-shadow:0 0 34px rgba(120,80,255,.55);transition:transform .12s}
+  .btn:active{transform:scale(.94)}
+  #go{overflow:auto}
+  #learn3{display:none;width:min(92vw,430px);margin:18px auto 4px;text-align:left}
+  .c3{background:rgba(120,80,255,.10);border:1px solid rgba(0,242,254,.25);border-radius:16px;padding:15px 17px;margin-bottom:13px}
+  .c3-t{font-size:12px;letter-spacing:2px;color:#00f2fe;font-weight:900;margin-bottom:9px}
+  #fact3{font-size:14px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:400}
+  #fact3 b{color:#ff4ecd}
+  .r3{margin:13px 0 2px}
+  .r3-top{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:#fff;letter-spacing:.5px}
+  .r3-top .v{color:#00f2fe}
+  .r3 input[type=range]{width:100%;margin-top:7px;accent-color:#a259ff;cursor:pointer}
+  .r3 select{width:100%;margin-top:7px;padding:9px 11px;border-radius:10px;background:#160c2e;color:#fff;border:1px solid rgba(0,242,254,.35);font-weight:700;font-size:13px;cursor:pointer}
+  .h3hint{font-size:11.5px;line-height:1.45;color:rgba(255,255,255,.5);margin-top:7px;font-weight:400}
+</style>
+</head>
+<body>
+<a href="../index.html" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(0,0,0,.45);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:7px 14px;border-radius:20px;backdrop-filter:blur(8px)">← HOME</a>
+
+<canvas id="c"></canvas>
+<div class="ov" id="start">
+  <h1>ORBIT</h1>
+  <div class="sub">Tap anywhere to <b>reverse</b> the ball.<br>Grab the 💎 gems. Dodge the red.</div>
+  <div class="hint">TAP · CLICK · SPACE</div>
+  <button class="btn" id="play">PLAY</button>
+</div>
+<div class="ov" id="go">
+  <h2 id="goTitle">GAME OVER</h2>
+  <div class="big" id="goScore">0</div>
+  <div class="best" id="goBest">BEST 0</div>
+  <div id="learn3">
+    <div class="c3"><div class="c3-t">🪐 SCIENCE OF THE ORBIT</div><div id="fact3"></div></div>
+    <div class="c3">
+      <div class="c3-t">🎛️ TWEAK IT &amp; PLAY AGAIN</div>
+      <div class="r3">
+        <div class="r3-top"><span>🛰️ Orbit Speed</span><span class="v" id="osVal">1.0×</span></div>
+        <input type="range" id="osSlider" min="0.6" max="2" step="0.1" value="1">
+        <div class="h3hint"><b>Angular speed</b> is how fast the ball sweeps around the center. Faster spin = less time to time your tap.</div>
+      </div>
+      <div class="r3">
+        <div class="r3-top"><span>⭕ Orbit Size</span></div>
+        <select id="orSel">
+          <option value="0.22">Small — short lap</option>
+          <option value="0.30" selected>Medium</option>
+          <option value="0.38">Large — long lap</option>
+        </select>
+        <div class="h3hint">A bigger circle has a longer way around — its <b>circumference</b> = 2 × π × radius (π ≈ 3.14).</div>
+      </div>
+    </div>
+  </div>
+  <button class="btn" id="again">PLAY AGAIN</button>
+</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const TAU=Math.PI*2;
+const norm=a=>((a%TAU)+TAU)%TAU;
+const angMin=(a,b)=>{const d=Math.abs(norm(a-b));return Math.min(d,TAU-d);};
+let cfgSpeedMult=1,cfgRadiusFactor=0.30;
+const FACTS3=["🪐 Real planets <b>orbit</b> the Sun in giant loops, just like the ball circles the center. Gravity is the invisible pull that keeps them from flying off into space.","🛰️ <b>Angular speed</b> is how fast something travels around a center point. Turn up the orbit speed and the ball whips around quicker — so you get less time to react.","⭕ The distance around a circle is its <b>circumference</b>, found with 2 × π × radius. The number π (pi) is about 3.14. A bigger orbit means a longer trip around the ring!","🌀 What keeps the ball curving instead of flying straight? A center-pulling force called <b>centripetal force</b>. Without it, the ball would shoot off in a straight line — that's <b>inertia</b>.","🔄 Every tap flips the ball's direction instantly. In science, changing direction counts as <b>acceleration</b> too — acceleration means any change in speed OR direction, not just speeding up."];
+let W,H,cx,cy,R;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;cx=W/2;cy=H/2;R=Math.min(W,H)*cfgRadiusFactor;}
+resize();addEventListener('resize',resize);
+let AC;
+function ac(){try{return AC||(AC=new(window.AudioContext||window.webkitAudioContext)())}catch(e){return null}}
+function beep(f,d,type='sine',v=.18){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.start();o.stop(a.currentTime+d);}
+const sGem=()=>{beep(740,.09,'sine',.2);beep(1110,.14,'sine',.16);};
+const sFlip=()=>beep(320,.07,'triangle',.12);
+const sDie=()=>{beep(220,.12,'sawtooth',.22);beep(90,.4,'square',.22);};
+let ball={angle:-Math.PI/2,dir:1};
+let omega=0.030,baseOmega=0.030,score=0,best=+(localStorage.getItem('orbit_best')||0);
+let running=false,coin=null,spikes=[],particles=[],trail=[],ripples=[],shakeTTL=0,milestone=0;
+const $=id=>document.getElementById(id);
+function pos(a){return{x:cx+Math.cos(a)*R,y:cy+Math.sin(a)*R};}
+function onPath(theta){const a=norm(ball.angle),b=norm(coin.angle);let d=norm(b-a),start,len;if(d<=Math.PI){start=a;len=d;}else{start=b;len=TAU-d;}const pad=0.38;return norm(theta-(start-pad))<=len+2*pad;}
+function spawnCoin(){let a;do{a=Math.random()*TAU;}while(angMin(a,ball.angle)<0.65);coin={angle:a,t:0};}
+function rebuildSpikes(){const count=Math.min(7,1+Math.floor(score/4));spikes=[];let tries=0;while(spikes.length<count&&tries<500){tries++;const a=Math.random()*TAU;if(angMin(a,ball.angle)<0.55)continue;if(onPath(a))continue;if(spikes.some(s=>angMin(s.angle,a)<0.42))continue;spikes.push({angle:a,spin:Math.random()*TAU,phase:Math.random()*TAU});}}
+function burst(p,col,n=18,big=false){for(let i=0;i<n;i++){const ang=Math.random()*TAU,sp=big?2+Math.random()*7:2+Math.random()*4;particles.push({x:p.x,y:p.y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,r:2+Math.random()*(big?5:3),life:1,col});}}
+function start(){baseOmega=0.030*cfgSpeedMult;R=Math.min(W,H)*cfgRadiusFactor;score=0;omega=baseOmega;ball.angle=-Math.PI/2;ball.dir=1;milestone=0;spikes=[];particles=[];trail=[];ripples=[];shakeTTL=0;spawnCoin();rebuildSpikes();$('start').style.display='none';$('go').style.display='none';running=true;}
+function flip(){if(!running)return;ball.dir*=-1;sFlip();ripples.push({x:pos(ball.angle).x,y:pos(ball.angle).y,r:8,life:1,col:'#00f2fe'});}
+function collect(){score++;burst(pos(coin.angle),'#ffd60a',20,true);ripples.push({...pos(coin.angle),r:10,life:1,col:'#ffd60a'});sGem();omega=Math.min(baseOmega+0.05,baseOmega+score*0.0013);if(score>best){best=score;localStorage.setItem('orbit_best',best);}if(score%10===0){shakeTTL=10;burst(pos(ball.angle),'#a259ff',26,true);}spawnCoin();rebuildSpikes();}
+function die(){running=false;shakeTTL=22;sDie();burst(pos(ball.angle),'#ff4ecd',40,true);$('goTitle').textContent='GAME OVER';$('goScore').textContent=score;$('goBest').textContent='BEST '+best;$('fact3').innerHTML=FACTS3[Math.floor(Math.random()*FACTS3.length)];$('osSlider').value=cfgSpeedMult;$('osVal').textContent=(+cfgSpeedMult).toFixed(1)+'×';$('orSel').value=String(cfgRadiusFactor);$('learn3').style.display='block';setTimeout(()=>$('go').style.display='flex',260);}
+function update(){if(running){ball.angle=norm(ball.angle+omega*ball.dir);trail.push(pos(ball.angle));if(trail.length>20)trail.shift();coin.t+=0.12;if(angMin(ball.angle,coin.angle)<0.20)collect();for(const s of spikes){if(angMin(ball.angle,s.angle)<0.155){die();break;}}}particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.12;p.vx*=.99;p.life-=.022;});ripples=ripples.filter(r=>r.life>0);ripples.forEach(r=>{r.r+=3.2;r.life-=.045;});if(shakeTTL>0)shakeTTL--;}
+function draw(){const t=Date.now()/1000;let sx=0,sy=0;if(shakeTTL>0){const m=shakeTTL*.6;sx=(Math.random()-.5)*m*2;sy=(Math.random()-.5)*m*2;}ctx.setTransform(1,0,0,1,sx,sy);const hue=(t*16)%360;const bg=ctx.createRadialGradient(cx,cy,0,cx,cy,Math.max(W,H)*.75);bg.addColorStop(0,`hsl(${hue},60%,9%)`);bg.addColorStop(1,'#05030f');ctx.fillStyle=bg;ctx.fillRect(-40,-40,W+80,H+80);ctx.lineWidth=2;ctx.strokeStyle=`hsla(${hue},80%,60%,.18)`;ctx.beginPath();ctx.arc(cx,cy,R,0,TAU);ctx.stroke();const coreR=10+Math.sin(t*3)*2;ctx.fillStyle=`hsl(${hue},90%,65%)`;ctx.shadowColor=`hsl(${hue},90%,65%)`;ctx.shadowBlur=24;ctx.beginPath();ctx.arc(cx,cy,coreR,0,TAU);ctx.fill();ctx.shadowBlur=0;const prog=Math.min(score/30,1);for(const s of spikes){const p=pos(s.angle);const prox=angMin(ball.angle,s.angle);const near=Math.max(0,1-prox/0.9);const rad=14+near*near*24;const tilt=s.spin+Math.sin(t*1.9+s.phase)*(.12+prog*.75);ctx.save();ctx.translate(p.x,p.y);ctx.rotate(tilt);ctx.shadowColor='#ff2d55';ctx.shadowBlur=14+near*26;ctx.fillStyle=near>.55?'#ff5e7a':'#ff2d55';ctx.beginPath();for(let i=0;i<4;i++){const a=i/4*TAU;ctx[i?'lineTo':'moveTo'](Math.cos(a)*rad,Math.sin(a)*rad);}ctx.closePath();ctx.fill();ctx.fillStyle='#fff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(0,0,3+near*4,0,TAU);ctx.fill();ctx.restore();}if(coin){const p=pos(coin.angle),pr=11+Math.sin(coin.t)*2;ctx.shadowColor='#ffd60a';ctx.shadowBlur=26;const cg=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,pr*1.6);cg.addColorStop(0,'#fff7c2');cg.addColorStop(.5,'#ffd60a');cg.addColorStop(1,'#ffd60a00');ctx.fillStyle=cg;ctx.beginPath();ctx.arc(p.x,p.y,pr*1.6,0,TAU);ctx.fill();ctx.shadowBlur=0;ctx.font='16px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('💎',p.x,p.y+1);}for(let i=0;i<trail.length;i++){const a=i/trail.length;ctx.globalAlpha=a*.5;ctx.fillStyle='#00f2fe';ctx.beginPath();ctx.arc(trail[i].x,trail[i].y,2+a*9,0,TAU);ctx.fill();}ctx.globalAlpha=1;const b=pos(ball.angle);ctx.shadowColor='#00f2fe';ctx.shadowBlur=28;const bg2=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,16);bg2.addColorStop(0,'#fff');bg2.addColorStop(.6,'#00f2fe');bg2.addColorStop(1,'#00f2fe00');ctx.fillStyle=bg2;ctx.beginPath();ctx.arc(b.x,b.y,16,0,TAU);ctx.fill();ctx.fillStyle='#fff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(b.x,b.y,5.5,0,TAU);ctx.fill();for(const r of ripples){ctx.globalAlpha=r.life;ctx.lineWidth=3;ctx.strokeStyle=r.col;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,TAU);ctx.stroke();}ctx.globalAlpha=1;for(const p of particles){ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;if(running){ctx.fillStyle='#fff';ctx.font='900 clamp(38px,11vw,76px) system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.globalAlpha=.92;ctx.fillText(score,cx,cy);ctx.globalAlpha=.4;ctx.font='600 14px system-ui';ctx.fillText('BEST '+best,cx,cy+R+44);ctx.globalAlpha=1;}ctx.setTransform(1,0,0,1,0,0);}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+function onTap(e){if(e&&e.preventDefault)e.preventDefault();ac();flip();}
+cv.addEventListener('mousedown',onTap);
+cv.addEventListener('touchstart',onTap,{passive:false});
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();flip();}});
+$('osSlider').addEventListener('input',e=>{$('osVal').textContent=(+e.target.value).toFixed(1)+'×';});
+function applyCfg(){cfgSpeedMult=+$('osSlider').value;cfgRadiusFactor=+$('orSel').value;}
+$('play').addEventListener('click',e=>{e.stopPropagation();start();});
+$('again').addEventListener('click',e=>{e.stopPropagation();applyCfg();start();});
+</script>
+</body>
+</html>

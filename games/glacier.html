@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Glacier Gauntlet ❄️</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%;overflow:hidden;font-family:system-ui;background:#040c18;color:#fff;touch-action:none;user-select:none}
+    #g{position:fixed;inset:0;display:block}
+    #ui{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;pointer-events:none;z-index:10}
+    h1{font-size:clamp(28px,9vw,56px);font-weight:900;margin-bottom:6px;text-shadow:0 0 28px rgba(0,229,255,.6);letter-spacing:.06em}
+    .sub{font-size:13px;opacity:.55;letter-spacing:2px;margin-bottom:10px}
+    #score{font-size:clamp(32px,12vw,80px);font-weight:900;color:#fff;text-shadow:0 0 30px #00e5ff}
+    #best{color:rgba(255,255,255,.55);font-size:13px;letter-spacing:2px}
+    .hint-start{font-size:11px;opacity:.4;letter-spacing:2px;margin-top:8px}
+    .btn{background:linear-gradient(135deg,#00e5ff,#00bcd4);color:#040c18;border:none;padding:13px 36px;border-radius:30px;font-weight:900;font-size:16px;cursor:pointer;margin-top:20px;pointer-events:auto;transition:transform .1s,box-shadow .2s;letter-spacing:.05em}
+    .btn:hover{transform:scale(1.05);box-shadow:0 0 32px rgba(0,229,255,.55)}
+    .btn:active{transform:scale(.95)}
+    #gameover{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(4,12,24,.82);backdrop-filter:blur(4px);z-index:20;overflow:auto;padding:24px 0}
+    #learn{display:none;width:min(90vw,420px);margin:6px auto 16px;text-align:left}
+    .c{background:rgba(0,229,255,.08);border:1px solid rgba(0,229,255,.25);border-radius:16px;padding:14px 16px;margin-bottom:12px}
+    .c-t{font-size:12px;letter-spacing:2px;color:#00e5ff;font-weight:900;margin-bottom:8px}
+    #fact{font-size:14px;line-height:1.55;color:rgba(255,255,255,.9);font-weight:400}
+    #fact b{color:#00e5ff}
+    .r{margin:12px 0 2px}
+    .r-top{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:#fff}
+    .r-top .v{color:#00e5ff}
+    .r input[type=range]{width:100%;margin-top:6px;accent-color:#00e5ff;cursor:pointer}
+    .r select{width:100%;margin-top:6px;padding:8px 10px;border-radius:9px;background:#071422;color:#fff;border:1px solid rgba(0,229,255,.3);font-weight:700;font-size:13px;cursor:pointer}
+    .h{font-size:11px;line-height:1.4;color:rgba(255,255,255,.5);margin-top:6px;font-weight:400}
+  </style>
+</head>
+<body>
+  <a href="../index.html" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(0,0,0,.45);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:7px 14px;border-radius:20px;backdrop-filter:blur(8px)">← HOME</a>
+
+  <canvas id="g"></canvas>
+  <div id="ui">
+    <h1>❄️ GLACIER GAUNTLET</h1>
+    <div class="sub">DODGE · COLLECT · SURVIVE</div>
+    <div id="score">0</div>
+    <div id="best">BEST: 0</div>
+    <div class="hint-start">TAP · CLICK · SPACE to flip</div>
+    <button class="btn" id="start">START GAME</button>
+  </div>
+  <div id="gameover">
+    <div style="text-align:center">
+      <h2 style="font-size:clamp(22px,7vw,36px);margin-bottom:8px;color:#00e5ff;text-shadow:0 0 20px rgba(0,229,255,.5)">GAME OVER</h2>
+      <div id="final" style="font-size:22px;margin-bottom:16px;opacity:.85">SCORE: 0</div>
+      <div id="learn">
+        <div class="c"><div class="c-t">❄️ ICE SCIENCE</div><div id="fact"></div></div>
+        <div class="c">
+          <div class="c-t">🎛️ TWEAK IT &amp; PLAY AGAIN</div>
+          <div class="r">
+            <div class="r-top"><span>❄️ Meltdrop Rate</span><span class="v" id="mrVal">1.0×</span></div>
+            <input type="range" id="mrSlider" min="0.5" max="2.5" step="0.1" value="1">
+            <div class="h">How fast blocks fall — higher = quicker drops, less time to react.</div>
+          </div>
+          <div class="r">
+            <div class="r-top"><span>❓ Crystal Chance</span></div>
+            <select id="crystalSel">
+              <option value="0.02">Rare</option>
+              <option value="0.07" selected>Normal</option>
+              <option value="0.15">Common</option>
+            </select>
+            <div class="h">How often ❄️ crystals fall — more crystals = more bonus points.</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn" id="restart">PLAY AGAIN</button>
+    </div>
+  </div>
+  <script>
+const TAU=Math.PI*2;
+const cv=document.getElementById('g');
+const ctx=cv.getContext('2d');
+let cfgMeltRate=1.0,cfgCrystalChance=0.07;
+const ICE_FACTS=[
+  "❄️ Ice is <b>water in its solid phase</b>. When water cools to 0 °C its molecules lock into a six-sided crystal lattice — the same geometry that gives every snowflake its hexagonal shape.",
+  "💧 Melting ice is a <b>phase change</b>. The energy you add goes into breaking hydrogen bonds instead of raising temperature — scientists call this stored energy <b>latent heat</b>.",
+  "🧊 Ice is <b>less dense than liquid water</b> — unusual for a solid! Water molecules in the crystal lattice sit farther apart, so ice floats. That's why rivers freeze from the top down.",
+  "🏔️ Glaciers store roughly <b>69 % of Earth's fresh water</b>. They form when years of snowfall compress into dense blue ice and flow slowly downhill under their own weight.",
+  "🌨️ No two snowflakes are exactly alike because each follows a <b>unique path through the atmosphere</b>, recording every tiny change in temperature or humidity in its crystal shape."
+];
+let W,H;
+function resize(){W=cv.width=innerWidth;H=cv.height=innerHeight;}
+resize();addEventListener('resize',resize);
+let running=false,dead=false,score=0,best=+(localStorage.getItem('gg_best')||0);
+let blocks=[],crystals=[],particles=[],ripples=[];
+let shakeTTL=0,frameCount=0,scoreTick=0,blockTimer=0;
+const PW=28,PH=20,BASE_SPEED=3.2;
+let px=0,py=0,pdir=1;
+const amb=Array.from({length:18},()=>({x:Math.random()*1000,y:Math.random()*800,vy:.4+Math.random()*.6,vx:(Math.random()-.5)*.4,t:Math.random()*TAU,sz:10+Math.random()*10,alpha:.15+Math.random()*.25}));
+let _ac;
+function ac(){try{return _ac||(_ac=new(window.AudioContext||window.webkitAudioContext)());}catch(e){return null;}}
+function beep(f,d,type='sine',v=.18){const a=ac();if(!a)return;const o=a.createOscillator(),g=a.createGain();o.connect(g);g.connect(a.destination);o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(.001,a.currentTime+d);o.start();o.stop(a.currentTime+d);}
+const sFlip=()=>beep(460,.07,'triangle',.12);
+const sCrystal=()=>{beep(880,.08,'sine',.18);beep(1320,.14,'sine',.14);};
+const sDie=()=>{beep(220,.12,'sawtooth',.22);beep(90,.4,'square',.20);};
+const sMilestone=()=>{beep(660,.10,'sine',.18);beep(880,.18,'sine',.15);};
+function gspeed(){return 1+Math.floor(score/8)*.16;}
+function aabb(ax,ay,aw,ah,bx,by,bw,bh){return ax<bx+bw&&ax+aw>bx&&ay<by+bh&&ay+ah>by;}
+function burst(x,y,col,n=18,big=false){for(let i=0;i<n;i++){const a=Math.random()*TAU,sp=big?2+Math.random()*7:1.5+Math.random()*4;particles.push({x,y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-1,r:2+Math.random()*(big?5:3),life:1,col});}}
+function spawnBlock(){const bw=34+Math.random()*(W*.28-34);const bx=Math.random()*(W-bw);const spd=(1.8+Math.random()*2.0)*cfgMeltRate*gspeed();const hue=170+Math.random()*55;blocks.push({x:bx,y:-36,w:bw,h:20+Math.random()*18,spd,hue,alpha:.72+Math.random()*.28});}
+function spawnCrystal(){const x=24+Math.random()*(W-48);const spd=(1.2+Math.random()*1.6)*cfgMeltRate*gspeed();crystals.push({x,y:-24,spd,t:Math.random()*TAU});}
+function startGame(){score=0;frameCount=0;scoreTick=0;blockTimer=0;blocks=[];crystals=[];particles=[];ripples=[];shakeTTL=0;dead=false;px=W/2-PW/2;py=H-72;pdir=1;document.getElementById('ui').style.display='none';document.getElementById('gameover').style.display='none';running=true;}
+function flip(){if(!running)return;pdir*=-1;sFlip();ripples.push({x:px+PW/2,y:py+PH/2,r:6,life:1,col:'#00e5ff'});}
+function die(){if(dead)return;dead=true;running=false;sDie();burst(px+PW/2,py+PH/2,'#00e5ff',36,true);shakeTTL=22;if(score>best){best=score;localStorage.setItem('gg_best',best);}document.getElementById('final').textContent='SCORE: '+score;document.getElementById('fact').innerHTML=ICE_FACTS[Math.floor(Math.random()*ICE_FACTS.length)];document.getElementById('mrSlider').value=cfgMeltRate;document.getElementById('mrVal').textContent=cfgMeltRate.toFixed(1)+'×';document.getElementById('crystalSel').value=String(cfgCrystalChance);document.getElementById('learn').style.display='block';setTimeout(()=>{document.getElementById('gameover').style.display='flex';},290);}
+function update(){for(const f of amb){f.y+=f.vy;f.x+=f.vx;f.t+=.04;if(f.y>H+30){f.y=-20;f.x=Math.random()*W;}if(f.x<-20||f.x>W+20){f.x=Math.random()*W;f.y=Math.random()*H*.4;}}if(!running)return;frameCount++;const spd=BASE_SPEED*(1+Math.floor(score/8)*.14);px+=spd*pdir;if(px+PW>=W){px=W-PW;pdir=-1;}if(px<=0){px=0;pdir=1;}scoreTick++;if(scoreTick>=60){scoreTick=0;score++;if(score>best){best=score;localStorage.setItem('gg_best',best);}if(score%10===0){shakeTTL=10;sMilestone();}}const interval=Math.max(16,52-Math.floor(score/4)*4);blockTimer++;if(blockTimer>=interval){blockTimer=0;spawnBlock();}if(Math.random()<cfgCrystalChance*.08)spawnCrystal();for(let i=blocks.length-1;i>=0;i--){const b=blocks[i];b.y+=b.spd;if(b.y>H+40){blocks.splice(i,1);continue;}if(aabb(px,py,PW,PH,b.x,b.y,b.w,b.h)){die();return;}}for(let i=crystals.length-1;i>=0;i--){const c=crystals[i];c.y+=c.spd;c.t+=.12;if(c.y>H+40){crystals.splice(i,1);continue;}if(aabb(px-6,py-6,PW+12,PH+12,c.x-14,c.y-14,28,28)){crystals.splice(i,1);score+=3;if(score>best){best=score;localStorage.setItem('gg_best',best);}sCrystal();burst(c.x,c.y,'#00e5ff',22);ripples.push({x:c.x,y:c.y,r:8,life:1,col:'#00e5ff'});}}particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.14;p.vx*=.98;p.life-=.022;});ripples=ripples.filter(r=>r.life>0);ripples.forEach(r=>{r.r+=3.2;r.life-=.05;});if(shakeTTL>0)shakeTTL--;}
+function draw(){const t=Date.now()/1000;let sx=0,sy=0;if(shakeTTL>0){const m=shakeTTL*.55;sx=(Math.random()-.5)*m*2;sy=(Math.random()-.5)*m*2;}ctx.setTransform(1,0,0,1,sx,sy);const hshift=200+Math.sin(t*.4)*22;const bgG=ctx.createRadialGradient(W*.5,H*.28,0,W*.5,H*.5,Math.max(W,H)*.85);bgG.addColorStop(0,`hsl(${hshift},55%,10%)`);bgG.addColorStop(1,'#040c18');ctx.fillStyle=bgG;ctx.fillRect(-40,-40,W+80,H+80);for(let i=0;i<3;i++){const ah=(hshift+i*36)%360;const ay=H*.12+Math.sin(t*.55+i*2.1)*H*.07;const aG=ctx.createLinearGradient(0,ay-50,0,ay+70);aG.addColorStop(0,`hsla(${ah},80%,58%,0)`);aG.addColorStop(.5,`hsla(${ah},80%,58%,0.065)`);aG.addColorStop(1,`hsla(${ah},80%,58%,0)`);ctx.fillStyle=aG;ctx.fillRect(0,ay-50,W,120);}ctx.textAlign='center';ctx.textBaseline='middle';for(const f of amb){ctx.globalAlpha=f.alpha*(.7+Math.sin(f.t)*.3);ctx.font=`${f.sz}px system-ui`;ctx.fillText('❄',f.x,f.y);}ctx.globalAlpha=1;if(running){ctx.strokeStyle='rgba(0,229,255,0.13)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,py+PH+10);ctx.lineTo(W,py+PH+10);ctx.stroke();for(const b of blocks){ctx.save();ctx.globalAlpha=b.alpha;ctx.shadowColor=`hsl(${b.hue},80%,70%)`;ctx.shadowBlur=14;const bG=ctx.createLinearGradient(b.x,b.y,b.x,b.y+b.h);bG.addColorStop(0,`hsl(${b.hue},80%,82%)`);bG.addColorStop(1,`hsl(${b.hue},72%,48%)`);ctx.fillStyle=bG;ctx.beginPath();ctx.roundRect(b.x,b.y,b.w,b.h,5);ctx.fill();ctx.fillStyle='rgba(255,255,255,0.22)';ctx.beginPath();ctx.roundRect(b.x+4,b.y+4,b.w-8,6,3);ctx.fill();ctx.restore();}for(const c of crystals){const pulse=1+Math.sin(c.t)*.14;ctx.save();ctx.shadowColor='#00e5ff';ctx.shadowBlur=22;ctx.font=`${Math.round(22*pulse)}px system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('❄️',c.x,c.y);ctx.restore();}const pcx=px+PW/2,pcy=py+PH/2;ctx.shadowColor='#00e5ff';ctx.shadowBlur=30;const pG=ctx.createRadialGradient(pcx,pcy,0,pcx,pcy,PW*1.1);pG.addColorStop(0,'#ffffff');pG.addColorStop(.38,'#00e5ff');pG.addColorStop(1,'rgba(0,229,255,0)');ctx.fillStyle=pG;ctx.beginPath();ctx.arc(pcx,pcy,PW*1.1,0,TAU);ctx.fill();ctx.fillStyle='#fff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(pcx,pcy,5.5,0,TAU);ctx.fill();const ax=pcx+pdir*18,ay=pcy;ctx.globalAlpha=.35;ctx.fillStyle='#00e5ff';ctx.beginPath();ctx.moveTo(ax,ay-5);ctx.lineTo(ax+pdir*8,ay);ctx.lineTo(ax,ay+5);ctx.closePath();ctx.fill();ctx.globalAlpha=1;ctx.fillStyle='#fff';ctx.font='900 clamp(38px,11vw,76px) system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.globalAlpha=.90;ctx.fillText(score,W/2,H/2);ctx.globalAlpha=.38;ctx.font='600 13px system-ui';ctx.fillText('BEST '+best,W/2,H*.5+52);ctx.globalAlpha=1;if(frameCount<180){ctx.globalAlpha=Math.min(1,(180-frameCount)/60)*.65;ctx.fillStyle='#00e5ff';ctx.font='600 12px system-ui';ctx.fillText('TAP · CLICK · SPACE to flip',W/2,py-26);ctx.globalAlpha=1;}}for(const r of ripples){ctx.globalAlpha=r.life;ctx.strokeStyle=r.col;ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,TAU);ctx.stroke();}ctx.globalAlpha=1;for(const p of particles){ctx.globalAlpha=Math.max(0,p.life);ctx.fillStyle=p.col;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,TAU);ctx.fill();}ctx.globalAlpha=1;ctx.setTransform(1,0,0,1,0,0);}
+function loop(){update();draw();requestAnimationFrame(loop);}
+loop();
+function onInput(e){if(e&&e.preventDefault)e.preventDefault();ac();flip();}
+cv.addEventListener('mousedown',onInput);
+cv.addEventListener('touchstart',onInput,{passive:false});
+addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();onInput();}});
+document.getElementById('mrSlider').addEventListener('input',e=>{document.getElementById('mrVal').textContent=(+e.target.value).toFixed(1)+'×';});
+document.getElementById('start').addEventListener('click',e=>{e.stopPropagation();ac();startGame();});
+document.getElementById('restart').addEventListener('click',e=>{e.stopPropagation();cfgMeltRate=+document.getElementById('mrSlider').value;cfgCrystalChance=+document.getElementById('crystalSel').value;startGame();});
+document.getElementById('score').textContent='0';
+document.getElementById('best').textContent='BEST: '+best;
+  </script>
+</body>
+</html>

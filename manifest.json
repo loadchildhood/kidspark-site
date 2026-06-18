@@ -1,0 +1,71 @@
+{
+  "name": "KidSpark — Games That Teach",
+  "short_name": "KidSpark",
+  "description": "Science-packed arcade games for kids. Ad-free, parent controls, offline play.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "background_color": "#050815",
+  "theme_color": "#00e5ff",
+  "orientation": "natural",
+  "lang": "en-US",
+  "dir": "ltr",
+  "categories": ["education", "games", "kids"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/home.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "KidSpark home screen"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Glacier Gauntlet",
+      "short_name": "Glacier",
+      "url": "./games/glacier.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Orbit",
+      "short_name": "Orbit",
+      "url": "./games/orbit.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Drop Stack 3D",
+      "short_name": "Drop Stack",
+      "url": "./games/dropstack.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    },
+    {
+      "name": "Sunset Glow",
+      "short_name": "Sunset",
+      "url": "./games/sunset.html",
+      "icons": [{ "src": "icons/icon.svg", "sizes": "any" }]
+    }
+  ]
+}

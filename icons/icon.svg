@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="60%" stop-color="#a259ff"/>
+      <stop offset="100%" stop-color="#ff4ecd"/>
+    </linearGradient>
+    <linearGradient id="g2" x1="512" y1="0" x2="0" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#a259ff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="96" fill="#050815"/>
+
+  <!-- Soft inner glow -->
+  <circle cx="256" cy="256" r="200" fill="url(#g2)"/>
+
+  <!-- 4-pointed spark star -->
+  <path d="M256 72
+    C258 155 302 200 440 256
+    C302 312 258 357 256 440
+    C254 357 210 312 72 256
+    C210 200 254 155 256 72Z"
+    fill="url(#g1)"
+    filter="url(#glow)"/>
+
+  <!-- Inner secondary spark (smaller, rotated 45deg) -->
+  <path d="M256 148
+    C257 205 290 230 364 256
+    C290 282 257 307 256 364
+    C255 307 222 282 148 256
+    C222 230 255 205 256 148Z"
+    fill="white"
+    opacity="0.18"/>
+
+  <!-- Bright center dot -->
+  <circle cx="256" cy="256" r="22" fill="white" opacity="0.95"/>
+  <circle cx="256" cy="256" r="10" fill="white"/>
+</svg>
