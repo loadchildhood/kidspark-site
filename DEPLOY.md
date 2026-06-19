@@ -20,7 +20,7 @@ cd /home/m/Documents/stock_research/kidspark-site
 git init
 git add index.html
 git commit -m "Launch KidSpark site"
-git remote add origin https://github.com/YOUR_USERNAME/kidspark-site.git
+git remote add origin https://github.com/loadchildhood/kidspark-site.git
 git push -u origin main
 ```
 
@@ -29,14 +29,14 @@ git push -u origin main
 - Under **Source**, select **Deploy from a branch**
 - Branch: `main`, folder: `/ (root)` → click **Save**
 - Wait 1–2 minutes — your site will be live at:
-  `https://YOUR_USERNAME.github.io/kidspark-site/`
+  `https://loadchildhood.github.io/kidspark-site/`
 
 ### 4. Custom domain (optional)
 - Buy a domain (e.g. `kidspark.app`) from Namecheap or Google Domains
 - In **Settings → Pages → Custom domain**, enter your domain
-- Add a CNAME record in your DNS pointing to `YOUR_USERNAME.github.io`
+- Add a CNAME record in your DNS pointing to `loadchildhood.github.io`
 
 ## Your site URL
-`https://YOUR_USERNAME.github.io/kidspark-site/`
+`https://loadchildhood.github.io/kidspark-site/`
 
-Replace YOUR_USERNAME with your actual GitHub username.
+Replace loadchildhood with your actual GitHub username.

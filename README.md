@@ -35,7 +35,7 @@ cd /home/m/Documents/stock_research/kidspark-site
 git init
 git add .
 git commit -m "Launch KidSpark site"
-git remote add origin https://github.com/YOUR_USERNAME/kidspark-site.git
+git remote add origin https://github.com/loadchildhood/kidspark-site.git
 git branch -M main
 git push -u origin main
 ```
@@ -46,7 +46,7 @@ git push -u origin main
 3. Under **Source**: select **Deploy from a branch**
 4. Branch: `main`, Folder: `/ (root)` → click **Save**
 5. Wait ~2 minutes → your site is live at:
-   `https://YOUR_USERNAME.github.io/kidspark-site/`
+   `https://loadchildhood.github.io/kidspark-site/`
 
 ---
 
@@ -56,7 +56,7 @@ PWABuilder turns your hosted website into a Google Play APK for free.
 
 1. Go to **pwabuilder.com**
 2. Enter your GitHub Pages URL:
-   `https://YOUR_USERNAME.github.io/kidspark-site/`
+   `https://loadchildhood.github.io/kidspark-site/`
 3. Click **Start** — it will score your PWA (aim for 100/100)
 4. Click **Build My PWA**
 5. Select **Android** → click **Generate**
@@ -77,7 +77,7 @@ PWABuilder turns your hosted website into a Google Play APK for free.
 4. Fill in your developer profile:
    - **Developer name:** KidSpark
    - **Email:** your contact email
-   - **Website:** `https://YOUR_USERNAME.github.io/kidspark-site/`
+   - **Website:** `https://loadchildhood.github.io/kidspark-site/`
 5. Accept the Developer Distribution Agreement
 6. Wait up to 48 hours for account verification
 
@@ -104,7 +104,7 @@ Go through each required section in the left menu:
 | **Ads** | Does not contain ads |
 | **Content ratings** | Complete the IARC questionnaire (see store-listings.md) |
 | **Target audience** | Ages 5 and up; designed for children |
-| **Privacy policy** | `https://YOUR_USERNAME.github.io/kidspark-site/privacy.html` |
+| **Privacy policy** | `https://loadchildhood.github.io/kidspark-site/privacy.html` |
 
 ### Store listing
 Copy from `store-listings.md`:
@@ -171,7 +171,7 @@ kidspark-site/
 
 ## Update Your URLs
 
-Replace `YOUR_USERNAME` with your actual GitHub username everywhere:
+Replace `loadchildhood` with your actual GitHub username everywhere:
 - In `README.md`
 - In `store-listings.md` (developer website + privacy policy URL)
 - In Play Console listing
