@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<title>NOVA ARC</title>
+<meta name="game:id"     content="novaarc">
+<meta name="game:title"  content="Nova Arc">
+<meta name="game:emoji"  content="🚀">
+<meta name="game:genre"  content="TRAJECTORY SCIENCE · SKILL">
+<meta name="game:desc"   content="Thrust through gates and dodge hazards — mastering parabolic arcs, gravity, impulse, and projectile motion.">
+<meta name="game:tags"   content="Projectile Motion, Skill">
+<meta name="game:bg"     content="linear-gradient(135deg,#030712,#0a1428)">
+<meta name="game:accent" content="#f9d423">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#030712;color:#fff;
+    font-family:system-ui,-apple-system,sans-serif;touch-action:none;user-select:none}
+  #c{position:fixed;inset:0;display:block}
+  .ov{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;
+    justify-content:center;text-align:center;z-index:10;padding:24px}
+  #go{display:none;background:rgba(3,7,18,.84);backdrop-filter:blur(4px);overflow:auto}
+  h1{font-size:clamp(44px,14vw,88px);font-weight:900;letter-spacing:.1em;
+    background:linear-gradient(90deg,#f9d423,#ff6b35,#f093fb);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 22px rgba(249,130,35,.5))}
+  .sub{margin-top:10px;opacity:.7;font-size:clamp(13px,3.5vw,16px);line-height:1.6;max-width:360px}
+  .hint{margin-top:6px;opacity:.45;font-size:12px;letter-spacing:.2em}
+  h2{font-size:clamp(26px,8vw,48px);font-weight:900;color:#f9d423;
+    filter:drop-shadow(0 0 16px rgba(249,212,35,.6))}
+  .big{font-size:clamp(46px,17vw,108px);font-weight:900;margin:4px 0;
+    background:linear-gradient(90deg,#f9d423,#f093fb);
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .best{opacity:.6;letter-spacing:.22em;font-size:13px}
+  .btn{margin-top:22px;pointer-events:auto;cursor:pointer;border:none;
+    padding:15px 44px;border-radius:40px;font-weight:900;font-size:17px;letter-spacing:.07em;
+    color:#030712;background:linear-gradient(135deg,#f9d423,#ff6b35);
+    box-shadow:0 0 32px rgba(249,180,35,.5);transition:transform .12s}
+  .btn:active{transform:scale(.94)}
+  #learnA{display:none;width:min(92vw,430px);margin:16px auto 4px;text-align:left}
+  .cA{background:rgba(249,130,35,.09);border:1px solid rgba(249,212,35,.25);
+    border-radius:16px;padding:15px 17px;margin-bottom:12px}
+  .cA-t{font-size:12px;letter-spacing:2px;color:#f9d423;font-weight:900;margin-bottom:8px}
+  #factA{font-size:14px;line-height:1.55;color:rgba(255,255,255,.9)}
+  #factA b{color:#f093fb}
+  .rA{margin:12px 0 2px}
+  .rA-top{display:flex;justify-content:space-between;font-size:13px;font-weight:900;color:#fff;letter-spacing:.4px}
+  .rA-top .v{color:#f9d423}
+  .rA input[type=range]{width:100%;margin-top:7px;accent-color:#f9d423;cursor:pointer}
+  .rA select{width:100%;margin-top:7px;padding:8px 11px;border-radius:10px;
+    background:#160e04;color:#fff;border:1px solid rgba(249,212,35,.3);
+    font-weight:700;font-size:13px;cursor:pointer}
+  .hAhint{font-size:11.5px;line-height:1.45;color:rgba(255,255,255,.5);margin-top:7px}
+</style>
+</head>
+<body>
+<a href="../index.html" style="position:fixed;top:12px;left:12px;z-index:999;background:rgba(0,0,0,.45);color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.15);text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1.5px;padding:7px 14px;border-radius:20px;backdrop-filter:blur(8px)">← HOME</a>
+<canvas id="c"></canvas>
+
+<div class="ov" id="start">
+  <h1>NOVA ARC</h1>
+  <div class="sub">Tap to thrust upward. Fly through the 🚀 gates.<br>Collect 💎 gems. Dodge 🔴 hazards. Survive gravity.</div>
+  <div class="hint">TAP · CLICK · SPACE</div>
+  <button class="btn" id="play">LAUNCH</button>
+</div>
+
+<div class="ov" id="go">
+  <h2>GAME OVER</h2>
+  <div class="big" id="goScore">0</div>
+  <div class="best" id="goBest">BEST 0</div>
+
+  <div id="learnA">
+    <div class="cA">
+      <div class="cA-t">🚀 TRAJECTORY SCIENCE</div>
+      <div id="factA"></div>
+    </div>
+    <div class="cA">
+      <div class="cA-t">🎛️ TWEAK &amp; PLAY AGAIN</div>
+      <div class="rA">
+        <div class="rA-top"><span>🌍 Gravity</span><span class="v" id="gravVal">1.0×</span></div>
+        <input type="range" id="gravSlider" min="0.4" max="2.2" step="0.1" value="1">
+        <div class="hAhint"><b>Gravity</b> is the constant downward pull that bends every trajectory into a parabola. Higher = faster fall, shorter arc hang-time.</div>
+      </div>
+      <div class="rA">
+        <div class="rA-top"><span>⚡ Thrust Power</span><span class="v" id="thrVal">1.0×</span></div>
+        <input type="range" id="thrSlider" min="0.5" max="1.8" step="0.1" value="1">
+        <div class="hAhint">Each tap applies an upward <b>impulse</b> — a sudden push that instantly changes your velocity. More thrust = higher arcs, harder to fine-tune.</div>
+      </div>
+      <div class="rA">
+        <div class="rA-top"><span>🌀 Obstacle Density</span></div>
+        <select id="denSel">
+          <option value="0.55">Sparse — breathe easy</option>
+          <option value="1.0" selected>Normal</option>
+          <option value="1.55">Dense — intense</option>
+        </select>
+        <div class="hAhint">Controls how tightly gates and hazards are packed. Denser spacing means less time between each decision.</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="btn" id="again">PLAY AGAIN</button>
+</div>
+
+<script>
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+const TAU = Math.PI * 2;
+const $ = id => document.getElementById(id);
+
+/* ── tweakable config ── */
+let cfgGrav    = 1.0;
+let cfgThrust  = 1.0;
+let cfgDensity = 1.0;
+
+/* ── science facts ── */
+const FACTS = [
+  "🚀 Any object launched through the air follows a <b>parabolic arc</b>: horizontal speed stays constant while gravity pulls it downward at 9.8 m/s² (on Earth). Galileo described this in 1638 — centuries before rockets existed.",
+  "🌍 <b>Gravity</b> accelerates every object equally, regardless of mass. A marble and a cannonball dropped from the same height hit the ground at the same time. It's air resistance — not weight — that makes a feather fall slower.",
+  "⚡ Each tap gives the ship an upward <b>impulse</b> — a sudden change in momentum. At the peak of the arc, all kinetic energy from that thrust has converted into <b>gravitational potential energy</b>. Then it converts back as the ship falls.",
+  "🎯 The <b>range</b> of a projectile is greatest at a 45° launch angle. Steeper angles waste energy going up; shallower angles don't get enough height. 45° is the perfect balance — a result provable with basic calculus.",
+  "🔄 In empty space there's no air drag, so a projectile would travel forever in a straight line. It's <b>atmospheric drag</b> on Earth that shortens real arcs — drag force grows with the square of speed, so going twice as fast means four times the drag."
+];
+
+/* ── physics ── */
+const BASE_GRAV   = 0.30;
+const BASE_THRUST = -7.0;
+const BASE_SCROLL = 3.6;
+const BALL_X      = 120;
+const BALL_R      = 11;
+const BAND_H      = 52;
+
+/* ── state ── */
+let W, H, scrollX, frameCount;
+let ball, running = false;
+let gates = [], gems = [], hazards = [], particles = [], trail = [], ripples = [];
+let score = 0, best = +(localStorage.getItem('nova_arc_best') || 0);
+let shakeTTL = 0, nextSpawnX = 0;
+
+/* ── parallax layers ── */
+let stars = [], nebulae = [];
+
+function initLayers() {
+  stars = Array.from({ length: 90 }, () => ({
+    x: Math.random() * W, y: Math.random() * H,
+    r: 0.4 + Math.random() * 1.6,
+    depth: 0.05 + Math.random() * 0.4,
+    alpha: 0.2 + Math.random() * 0.65
+  }));
+  nebulae = Array.from({ length: 6 }, () => ({
+    x: Math.random() * W * 1.5,
+    y: BAND_H + Math.random() * (H - BAND_H * 2),
+    rx: 80 + Math.random() * 120, ry: 40 + Math.random() * 70,
+    hue: Math.random() * 360,
+    alpha: 0.018 + Math.random() * 0.028,
+    depth: 0.08 + Math.random() * 0.12
+  }));
+}
+
+function resize() {
+  W = cv.width = innerWidth;
+  H = cv.height = innerHeight;
+  if (!stars.length) initLayers();
+}
+resize();
+addEventListener('resize', resize);
+
+/* ── audio ── */
+let AC;
+function ac() { try { return AC || (AC = new (window.AudioContext || window.webkitAudioContext)()); } catch(e) { return null; } }
+function beep(f, d, type = 'sine', v = 0.18) {
+  const a = ac(); if (!a) return;
+  const o = a.createOscillator(), g = a.createGain();
+  o.connect(g); g.connect(a.destination);
+  o.type = type; o.frequency.value = f;
+  g.gain.setValueAtTime(v, a.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + d);
+  o.start(); o.stop(a.currentTime + d);
+}
+const sThrust = () => beep(380, 0.08, 'triangle', 0.13);
+const sGem    = () => { beep(740, 0.08, 'sine', 0.18); beep(1100, 0.13, 'sine', 0.14); };
+const sDie    = () => { beep(220, 0.12, 'sawtooth', 0.22); beep(90, 0.38, 'square', 0.22); };
+const sGate   = () => beep(520, 0.07, 'sine', 0.11);
+const sMile   = () => { beep(660, 0.1, 'sine', 0.18); beep(880, 0.18, 'sine', 0.15); };
+
+/* ── spawning ── */
+function spawnGate(wx) {
+  const gapH = Math.max(105, 200 - score * 2.2);
+  const margin = BAND_H + 18;
+  const gapY = margin + Math.random() * (H - margin * 2 - gapH);
+  const hue = 160 + Math.random() * 120;
+  gates.push({ wx, gapY, gapH, w: 26, passed: false, hue });
+}
+
+function spawnGem(wx) {
+  const margin = BAND_H + 30;
+  gems.push({
+    wx,
+    baseY: margin + Math.random() * (H - margin * 2),
+    r: 10, t: Math.random() * TAU, collected: false
+  });
+}
+
+function spawnHazard(wx) {
+  const margin = BAND_H + 40;
+  hazards.push({
+    wx,
+    baseY: margin + Math.random() * (H - margin * 2),
+    amp: 35 + Math.random() * 80,
+    phase: Math.random() * TAU,
+    freq: 0.025 + Math.random() * 0.04,
+    r: 14
+  });
+}
+
+function maybeSpawn() {
+  const viewRight = scrollX + W + 350;
+  while (nextSpawnX < viewRight) {
+    const gap = (170 + Math.random() * 90) / cfgDensity;
+    nextSpawnX += gap;
+    const roll = Math.random();
+    if (roll < 0.52) spawnGate(nextSpawnX);
+    else if (roll < 0.78) spawnGem(nextSpawnX);
+    else spawnHazard(nextSpawnX);
+  }
+}
+
+function burst(x, y, col, n = 16, big = false) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * TAU, sp = big ? 2.5 + Math.random() * 7 : 1.5 + Math.random() * 4;
+    particles.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 1.5, r: 2 + Math.random() * (big ? 5 : 3), life: 1, col });
+  }
+}
+
+/* ── start ── */
+function startGame() {
+  score = 0; frameCount = 0; scrollX = 0;
+  nextSpawnX = W + 420;
+  gates = []; gems = []; hazards = []; particles = []; trail = []; ripples = [];
+  ball = { x: BALL_X, y: H / 2, vy: 0 };
+  running = true;
+  $('start').style.display = 'none';
+  $('go').style.display = 'none';
+  maybeSpawn();
+}
+
+/* ── thrust ── */
+function thrust() {
+  if (!running) return;
+  ball.vy = BASE_THRUST * cfgThrust;
+  sThrust();
+  ripples.push({ x: ball.x, y: ball.y, r: 5, life: 1, col: '#f9d423' });
+}
+
+/* ── die ── */
+function die() {
+  if (!running) return;
+  running = false;
+  shakeTTL = 26;
+  sDie();
+  burst(ball.x, ball.y, '#ff6b35', 44, true);
+  if (score > best) { best = score; localStorage.setItem('nova_arc_best', best); }
+  $('goScore').textContent = score;
+  $('goBest').textContent = 'BEST ' + best;
+  $('factA').innerHTML = FACTS[Math.floor(Math.random() * FACTS.length)];
+  $('gravSlider').value = cfgGrav;   $('gravVal').textContent = cfgGrav.toFixed(1) + '×';
+  $('thrSlider').value  = cfgThrust; $('thrVal').textContent  = cfgThrust.toFixed(1) + '×';
+  $('denSel').value = String(cfgDensity);
+  $('learnA').style.display = 'block';
+  setTimeout(() => $('go').style.display = 'flex', 290);
+}
+
+/* ── update ── */
+function update() {
+  if (!running) {
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.14; p.vx *= 0.99; p.life -= 0.022; });
+    ripples = ripples.filter(r => r.life > 0);
+    ripples.forEach(r => { r.r += 3; r.life -= 0.05; });
+    if (shakeTTL > 0) shakeTTL--;
+    return;
+  }
+
+  frameCount++;
+  const scrollSpd = BASE_SCROLL + Math.min(score * 0.09, 4.0);
+  scrollX += scrollSpd;
+
+  /* physics */
+  ball.vy += BASE_GRAV * cfgGrav;
+  ball.y  += ball.vy;
+
+  /* trail */
+  trail.push({ x: ball.x, y: ball.y });
+  if (trail.length > 24) trail.shift();
+
+  /* band collisions */
+  if (ball.y - BALL_R < BAND_H || ball.y + BALL_R > H - BAND_H) { die(); return; }
+
+  /* gates */
+  for (const g of gates) {
+    const sx = g.wx - scrollX; // screen x of gate center
+    // already passed
+    if (sx + g.w / 2 < BALL_X - BALL_R) {
+      if (!g.passed) {
+        g.passed = true; score++;
+        if (score > best) { best = score; localStorage.setItem('nova_arc_best', best); }
+        sGate();
+        burst(ball.x, ball.y, `hsl(${g.hue},80%,60%)`, 14);
+        ripples.push({ x: ball.x, y: ball.y, r: 8, life: 1, col: `hsl(${g.hue},80%,60%)` });
+        if (score % 5 === 0) { shakeTTL = 9; burst(ball.x, ball.y, '#f9d423', 26, true); sMile(); }
+      }
+      continue;
+    }
+    if (sx - g.w / 2 > BALL_X + BALL_R) continue; // not reached yet
+
+    /* x overlaps — check y gap */
+    if (ball.y - BALL_R < g.gapY || ball.y + BALL_R > g.gapY + g.gapH) { die(); return; }
+  }
+
+  /* gems */
+  for (const gm of gems) {
+    if (gm.collected) continue;
+    gm.t += 0.08;
+    const sx = gm.wx - scrollX;
+    const sy = gm.baseY + Math.sin(gm.t) * 8;
+    if (Math.hypot(ball.x - sx, ball.y - sy) < BALL_R + gm.r) {
+      gm.collected = true; score += 2;
+      if (score > best) { best = score; localStorage.setItem('nova_arc_best', best); }
+      sGem();
+      burst(sx, sy, '#ffd60a', 20);
+      ripples.push({ x: sx, y: sy, r: 8, life: 1, col: '#ffd60a' });
+    }
+  }
+
+  /* hazards */
+  for (const h of hazards) {
+    const sx = h.wx - scrollX;
+    const sy = h.baseY + Math.sin(frameCount * h.freq + h.phase) * h.amp;
+    if (Math.hypot(ball.x - sx, ball.y - sy) < BALL_R + h.r) { die(); return; }
+  }
+
+  /* cull + spawn */
+  const cullX = scrollX - 300;
+  gates   = gates.filter(g => g.wx > cullX);
+  gems    = gems.filter(g => g.wx > cullX);
+  hazards = hazards.filter(h => h.wx > cullX);
+  maybeSpawn();
+
+  particles = particles.filter(p => p.life > 0);
+  particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.vy += 0.14; p.vx *= 0.99; p.life -= 0.022; });
+  ripples = ripples.filter(r => r.life > 0);
+  ripples.forEach(r => { r.r += 3; r.life -= 0.05; });
+  if (shakeTTL > 0) shakeTTL--;
+}
+
+/* ── draw ── */
+function draw() {
+  const t = Date.now() / 1000;
+  let ox = 0, oy = 0;
+  if (shakeTTL > 0) { const m = shakeTTL * 0.55; ox = (Math.random() - .5) * m * 2; oy = (Math.random() - .5) * m * 2; }
+  ctx.setTransform(1, 0, 0, 1, ox, oy);
+
+  /* ── background ── */
+  const hue = (t * 12) % 360;
+  const bgG = ctx.createLinearGradient(0, 0, 0, H);
+  bgG.addColorStop(0,   `hsl(${hue},55%,4%)`);
+  bgG.addColorStop(0.5, '#030712');
+  bgG.addColorStop(1,   `hsl(${(hue + 55) % 360},55%,5%)`);
+  ctx.fillStyle = bgG; ctx.fillRect(-40, -40, W + 80, H + 80);
+
+  /* ── nebula blobs (deep parallax) ── */
+  for (const nb of nebulae) {
+    const nx = ((nb.x - scrollX * nb.depth) % (W * 2) + W * 2) % (W * 2);
+    ctx.save();
+    ctx.translate(nx, nb.y);
+    const ng = ctx.createRadialGradient(0, 0, 0, 0, 0, nb.rx);
+    ng.addColorStop(0,   `hsla(${nb.hue},70%,55%,${nb.alpha * 3})`);
+    ng.addColorStop(0.5, `hsla(${nb.hue},70%,45%,${nb.alpha})`);
+    ng.addColorStop(1,   'hsla(0,0%,0%,0)');
+    ctx.scale(1, nb.ry / nb.rx);
+    ctx.fillStyle = ng;
+    ctx.beginPath(); ctx.arc(0, 0, nb.rx, 0, TAU); ctx.fill();
+    ctx.restore();
+  }
+
+  /* ── stars (two parallax speeds) ── */
+  for (const s of stars) {
+    const sx = ((s.x - scrollX * s.depth) % W + W) % W;
+    ctx.globalAlpha = s.alpha * (0.6 + Math.sin(t * 0.8 + s.x) * 0.4);
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(sx, s.y, s.r, 0, TAU); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── ceiling & floor bands ── */
+  const bandGrad = (top) => {
+    const g = ctx.createLinearGradient(0, top ? 0 : H - BAND_H, 0, top ? BAND_H : H);
+    g.addColorStop(0, `hsla(${hue},75%,38%,.55)`);
+    g.addColorStop(1, `hsla(${hue},75%,38%,.0)`);
+    return g;
+  };
+  ctx.fillStyle = bandGrad(true);  ctx.fillRect(0, 0, W, BAND_H);
+  ctx.fillStyle = bandGrad(false); ctx.fillRect(0, H - BAND_H, W, BAND_H);
+
+  /* spike row on bands */
+  ctx.fillStyle = `hsla(${hue},80%,55%,.45)`;
+  const spkW = 18, spkH = 14;
+  for (let i = 0; i < Math.ceil(W / spkW) + 1; i++) {
+    const bx = (i * spkW - (scrollX * 0.3) % spkW);
+    // ceiling spikes
+    ctx.beginPath();
+    ctx.moveTo(bx, BAND_H); ctx.lineTo(bx + spkW / 2, BAND_H - spkH); ctx.lineTo(bx + spkW, BAND_H);
+    ctx.closePath(); ctx.fill();
+    // floor spikes
+    ctx.beginPath();
+    ctx.moveTo(bx, H - BAND_H); ctx.lineTo(bx + spkW / 2, H - BAND_H + spkH); ctx.lineTo(bx + spkW, H - BAND_H);
+    ctx.closePath(); ctx.fill();
+  }
+
+  /* border glow lines */
+  ctx.strokeStyle = `hsla(${hue},80%,60%,.4)`;
+  ctx.lineWidth = 1.5; ctx.setLineDash([10, 7]);
+  ctx.beginPath(); ctx.moveTo(0, BAND_H); ctx.lineTo(W, BAND_H); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, H - BAND_H); ctx.lineTo(W, H - BAND_H); ctx.stroke();
+  ctx.setLineDash([]);
+
+  /* ── gates ── */
+  for (const g of gates) {
+    const gx = g.wx - scrollX;
+    if (gx < -80 || gx > W + 80) continue;
+    const gc = `hsl(${g.hue},80%,58%)`;
+    const gc2 = `hsl(${g.hue},80%,38%)`;
+
+    ctx.shadowColor = gc; ctx.shadowBlur = 16;
+
+    // top pillar
+    const topH = g.gapY - BAND_H;
+    if (topH > 0) {
+      const pg = ctx.createLinearGradient(gx - g.w / 2, BAND_H, gx + g.w / 2, BAND_H);
+      pg.addColorStop(0, gc2); pg.addColorStop(0.5, gc); pg.addColorStop(1, gc2);
+      ctx.fillStyle = pg;
+      ctx.beginPath(); ctx.roundRect(gx - g.w / 2, BAND_H, g.w, topH, [0, 0, 4, 4]); ctx.fill();
+    }
+
+    // bottom pillar
+    const botY = g.gapY + g.gapH;
+    const botH = H - BAND_H - botY;
+    if (botH > 0) {
+      const pg2 = ctx.createLinearGradient(gx - g.w / 2, botY, gx + g.w / 2, botY);
+      pg2.addColorStop(0, gc2); pg2.addColorStop(0.5, gc); pg2.addColorStop(1, gc2);
+      ctx.fillStyle = pg2;
+      ctx.beginPath(); ctx.roundRect(gx - g.w / 2, botY, g.w, botH, [4, 4, 0, 0]); ctx.fill();
+    }
+
+    // gap frame (the safe passage ring)
+    ctx.shadowBlur = 0;
+    ctx.strokeStyle = gc; ctx.lineWidth = 2.5; ctx.globalAlpha = 0.55;
+    ctx.strokeRect(gx - g.w / 2, g.gapY, g.w, g.gapH);
+    // center line in gap
+    ctx.globalAlpha = 0.25; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(gx, g.gapY + 4); ctx.lineTo(gx, g.gapY + g.gapH - 4); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  /* ── hazard orbs ── */
+  for (const h of hazards) {
+    const hx = h.wx - scrollX;
+    if (hx < -60 || hx > W + 60) continue;
+    const hy = h.baseY + Math.sin(frameCount * h.freq + h.phase) * h.amp;
+    ctx.save();
+    ctx.translate(hx, hy);
+    ctx.shadowColor = '#ff2d55'; ctx.shadowBlur = 22;
+    ctx.fillStyle = '#ff2d55';
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) {
+      const a = (i / 8) * TAU + t * 1.3;
+      const r = i % 2 === 0 ? h.r : h.r * 0.42;
+      ctx[i ? 'lineTo' : 'moveTo'](Math.cos(a) * r, Math.sin(a) * r);
+    }
+    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff7096'; ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(0, 0, h.r * 0.28, 0, TAU); ctx.fill();
+    // outer pulse ring
+    ctx.globalAlpha = 0.3 + Math.sin(t * 3 + h.phase) * 0.2;
+    ctx.strokeStyle = '#ff2d55'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(0, 0, h.r * 1.6, 0, TAU); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.restore();
+  }
+
+  /* ── gems ── */
+  for (const gm of gems) {
+    if (gm.collected) continue;
+    const gx = gm.wx - scrollX;
+    if (gx < -40 || gx > W + 40) continue;
+    const gy = gm.baseY + Math.sin(gm.t) * 8;
+    ctx.shadowColor = '#ffd60a'; ctx.shadowBlur = 22;
+    const cg = ctx.createRadialGradient(gx, gy, 0, gx, gy, gm.r * 1.6);
+    cg.addColorStop(0, '#fff7c2'); cg.addColorStop(0.5, '#ffd60a'); cg.addColorStop(1, 'rgba(255,214,10,0)');
+    ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(gx, gy, gm.r * 1.6, 0, TAU); ctx.fill();
+    ctx.shadowBlur = 0;
+    ctx.font = '14px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('💎', gx, gy + 1);
+  }
+
+  /* ── trajectory arc preview ── */
+  if (running && ball) {
+    let pvy = ball.vy;
+    let py2 = ball.y;
+    ctx.globalAlpha = 0.22; ctx.fillStyle = '#f9d423';
+    for (let i = 1; i <= 32; i++) {
+      pvy += BASE_GRAV * cfgGrav;
+      py2 += pvy;
+      if (py2 < BAND_H || py2 > H - BAND_H) break;
+      const sz = Math.max(0.6, 4.5 - i * 0.12);
+      const alpha = Math.max(0, 0.22 - i * 0.006);
+      ctx.globalAlpha = alpha;
+      ctx.beginPath(); ctx.arc(ball.x + i * 5, py2, sz, 0, TAU); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* ── ball trail ── */
+  for (let i = 0; i < trail.length; i++) {
+    const a = i / trail.length;
+    ctx.globalAlpha = a * 0.48;
+    ctx.fillStyle = '#f9d423';
+    ctx.beginPath(); ctx.arc(trail[i].x, trail[i].y, 2 + a * 10, 0, TAU); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── ball ── */
+  if (ball) {
+    ctx.shadowColor = '#f9d423'; ctx.shadowBlur = 30;
+    const br = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_R * 1.5);
+    br.addColorStop(0, '#fff'); br.addColorStop(0.5, '#f9d423'); br.addColorStop(1, 'rgba(249,212,35,0)');
+    ctx.fillStyle = br; ctx.beginPath(); ctx.arc(ball.x, ball.y, BALL_R * 1.5, 0, TAU); ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.shadowBlur = 0;
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, 5, 0, TAU); ctx.fill();
+  }
+
+  /* ── ripples ── */
+  for (const r of ripples) {
+    ctx.globalAlpha = r.life; ctx.lineWidth = 2.5; ctx.strokeStyle = r.col;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, TAU); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── particles ── */
+  for (const p of particles) {
+    ctx.globalAlpha = Math.max(0, p.life); ctx.fillStyle = p.col;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, TAU); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+
+  /* ── HUD ── */
+  if (running) {
+    ctx.fillStyle = '#fff';
+    ctx.font = '900 clamp(36px,10vw,70px) system-ui';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.globalAlpha = 0.88;
+    ctx.fillText(score, W / 2, H / 2);
+    ctx.globalAlpha = 0.35;
+    ctx.font = '600 13px system-ui';
+    ctx.fillText('BEST ' + best, W / 2, H / 2 + 50);
+    ctx.globalAlpha = 1;
+
+    const spd = (BASE_SCROLL + Math.min(score * 0.09, 4.0)).toFixed(1);
+    ctx.globalAlpha = 0.4; ctx.font = '700 11px system-ui'; ctx.textAlign = 'right';
+    ctx.fillText('SPD ' + spd, W - 16, 26);
+    ctx.textAlign = 'left';
+    ctx.fillText('GATES ' + score, 16, 26);
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+}
+
+/* ── loop ── */
+function loop() { update(); draw(); requestAnimationFrame(loop); }
+loop();
+
+/* ── input ── */
+function onTap(e) { if (e && e.preventDefault) e.preventDefault(); ac(); thrust(); }
+cv.addEventListener('mousedown', onTap);
+cv.addEventListener('touchstart', onTap, { passive: false });
+addEventListener('keydown', e => { if (e.code === 'Space') { e.preventDefault(); thrust(); } });
+
+/* ── slider live display ── */
+$('gravSlider').addEventListener('input', e => { $('gravVal').textContent = (+e.target.value).toFixed(1) + '×'; });
+$('thrSlider').addEventListener('input',  e => { $('thrVal').textContent  = (+e.target.value).toFixed(1) + '×'; });
+
+/* ── buttons ── */
+$('play').addEventListener('click',  e => { e.stopPropagation(); startGame(); });
+$('again').addEventListener('click', e => {
+  e.stopPropagation();
+  cfgGrav    = +$('gravSlider').value;
+  cfgThrust  = +$('thrSlider').value;
+  cfgDensity = +$('denSel').value;
+  startGame();
+});
+</script>
+</body>
+</html>

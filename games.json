@@ -1,0 +1,57 @@
+[
+  {
+    "id": "glacier",
+    "file": "games/glacier.html",
+    "title": "Glacier Gauntlet",
+    "emoji": "❄️",
+    "genre": "ICE SCIENCE · DODGE",
+    "desc": "Dodge falling ice blocks and catch crystals — learning about phase changes, latent heat, and why ice floats.",
+    "tags": ["Phase Change", "Reflexes"],
+    "bg": "linear-gradient(135deg,#040c18,#0a2040)",
+    "accent": "#00e5ff"
+  },
+  {
+    "id": "orbit",
+    "file": "games/orbit.html",
+    "title": "Orbit",
+    "emoji": "🪐",
+    "genre": "SPACE SCIENCE · TIMING",
+    "desc": "Reverse your orbital direction to grab gems and dodge hazards — exploring angular speed, circumference, and gravity.",
+    "tags": ["Orbital Motion", "Timing"],
+    "bg": "linear-gradient(135deg,#05030f,#160c2e)",
+    "accent": "#a259ff"
+  },
+  {
+    "id": "dropstack",
+    "file": "games/dropstack.html",
+    "title": "Drop Stack 3D",
+    "emoji": "🔥",
+    "genre": "PHYSICS · PRECISION",
+    "desc": "Stack 3D blocks with perfect timing — learning speed, acceleration, reaction time, and margin of error.",
+    "tags": ["Physics", "Precision"],
+    "bg": "linear-gradient(135deg,#0a0a1a,#1a0533)",
+    "accent": "#c471ed"
+  },
+  {
+    "id": "sunset",
+    "file": "games/sunset.html",
+    "title": "Sunset Glow",
+    "emoji": "🌅",
+    "genre": "LIGHT SCIENCE · REFLEX",
+    "desc": "Tap falling orbs before they hit the ground — discovering light scattering, gravity, and probability.",
+    "tags": ["Light & Optics", "Reflex"],
+    "bg": "linear-gradient(135deg,#0a0315,#1a0820)",
+    "accent": "#ff6b35"
+  },
+  {
+    "id": "novaarc",
+    "file": "games/novaarc.html",
+    "title": "Nova Arc",
+    "emoji": "🚀",
+    "genre": "TRAJECTORY SCIENCE · SKILL",
+    "desc": "Thrust through gates and dodge hazards — mastering parabolic arcs, gravity, impulse, and projectile motion.",
+    "tags": ["Projectile Motion", "Skill"],
+    "bg": "linear-gradient(135deg,#030712,#0a1428)",
+    "accent": "#f9d423"
+  }
+]

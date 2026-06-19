@@ -1,0 +1,180 @@
+# KidSpark Game Themes
+# ─────────────────────────────────────────────────────────────────────────────
+# This file is the canonical design reference for all KidSpark games.
+# AI models working on this codebase should read it first before:
+#   - building a new game
+#   - editing an existing game's visual style or science content
+#   - writing store listings or marketing copy
+# ─────────────────────────────────────────────────────────────────────────────
+
+brand:
+  name: KidSpark
+  tagline: "Games That Teach. Play That Matters."
+  app_name: SparkBox
+  colors:
+    background: "#050815"
+    card: "#0d1730"
+    card_alt: "#111c38"
+    cyan: "#00e5ff"
+    purple: "#a259ff"
+    pink: "#ff4ecd"
+    yellow: "#ffd60a"
+    green: "#43e97b"
+    orange: "#ff6b35"
+  font: "Segoe UI, system-ui, sans-serif"
+  target_audience: "Ages 5–12 (K–6)"
+  platform: "Android (Google Play) + Web (GitHub Pages PWA)"
+  coppa_compliant: true
+  ads: false
+  in_app_purchases: false
+  data_collection: false
+
+design_principles:
+  - "Science concept IS the mechanic — never interrupt play with a quiz"
+  - "Fact card appears on game over, when curiosity peaks"
+  - "One-tap / one-click to play — no tutorials needed"
+  - "Dark space-style palette: deep navy/black backgrounds, neon accents"
+  - "Sessions are 60–90 seconds — short, repeatable, rewarding"
+  - "Post-game 'Tweak It & Play Again' panel for difficulty adjustment"
+  - "Local high scores only (localStorage) — no accounts, no network calls"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# GAME REGISTRY
+# Each entry mirrors the fields in games.json. Add new games here AND in
+# games.json (or let the GitHub Action regenerate games.json from the HTML
+# meta tags automatically).
+# ─────────────────────────────────────────────────────────────────────────────
+games:
+
+  - id: glacier
+    file: games/glacier.html
+    title: "Glacier Gauntlet"
+    emoji: "❄️"
+    genre: "ICE SCIENCE · DODGE"
+    accent_color: "#00e5ff"
+    bg: "linear-gradient(135deg,#040c18,#0a2040)"
+    mechanic: >
+      Player slides left/right (tap/click/Space). Falling ice blocks rain from
+      above — dodge them. Catch ❄️ crystal snowflakes for bonus points.
+      Speed increases over time.
+    science_concept: "Phase changes & latent heat; ice density anomaly; crystal lattice"
+    curriculum_hook: "Why ice floats; how snowflakes form; glaciers & freshwater"
+    post_game_tweaks:
+      - "Meltdrop Rate (block fall speed)"
+      - "Crystal Chance (bonus collectible frequency)"
+    localStorage_key: null  # uses default per-game key
+    difficulty_curve: linear_speed_increase
+    tags: [Phase Change, Reflexes]
+    store_category: "Education / Arcade"
+    content_rating: "Everyone"
+
+  - id: orbit
+    file: games/orbit.html
+    title: "Orbit"
+    emoji: "🪐"
+    genre: "SPACE SCIENCE · TIMING"
+    accent_color: "#a259ff"
+    bg: "linear-gradient(135deg,#05030f,#160c2e)"
+    mechanic: >
+      A glowing ball travels in a circle. Tap/click/Space to instantly reverse
+      its direction. Grab 💎 gems on the ring, dodge red spinning hazards.
+      Ball speed increases with gems collected.
+    science_concept: "Angular speed; circumference (2πr); centripetal force; orbital motion"
+    curriculum_hook: "How planets orbit; why changing direction = acceleration"
+    post_game_tweaks:
+      - "Orbit Speed (0.6× to 2×)"
+      - "Orbit Size (small / medium / large)"
+    localStorage_key: null
+    difficulty_curve: speed_scales_with_score
+    tags: [Orbital Motion, Timing]
+    store_category: "Education / Arcade"
+    content_rating: "Everyone"
+
+  - id: dropstack
+    file: games/dropstack.html
+    title: "Drop Stack 3D"
+    emoji: "🔥"
+    genre: "PHYSICS · PRECISION"
+    accent_color: "#c471ed"
+    bg: "linear-gradient(135deg,#0a0a1a,#1a0533)"
+    mechanic: >
+      3D block slides back and forth. Tap to drop on the stack. Perfect lands
+      build COMBOS and trigger FEVER MODE (3× multiplier). Special blocks:
+      ⚡ Power (restore width), 🔮 Mystery (slow time/score bomb/multiplier),
+      💎 Gem (big bonus for perfect). Miss = game over.
+    science_concept: "Speed = distance ÷ time; reaction time; margin of error; reflection; acceleration"
+    curriculum_hook: "Human reaction time ~0.25s; why wider targets are easier"
+    post_game_tweaks:
+      - "Block Speed (2–8)"
+      - "Block Width (narrow / medium / wide)"
+    localStorage_key: null
+    difficulty_curve: block_speed_increases_with_height
+    tags: [Physics, Precision]
+    store_category: "Education / Arcade"
+    content_rating: "Everyone"
+
+  - id: sunset
+    file: games/sunset.html
+    title: "Sunset Glow"
+    emoji: "🌅"
+    genre: "LIGHT SCIENCE · REFLEX"
+    accent_color: "#ff6b35"
+    bg: "linear-gradient(135deg,#0a0315,#1a0820)"
+    mechanic: >
+      Glowing orbs fall from an animated sunset sky. Tap them before they land.
+      Avoid 💣 bombs (tap = game over). Special orbs: ⭐ Star (FRENZY 2× for 5s),
+      🕐 Time (SLOW-MO), 💎 Gem (50pts). Combo multiplier up to ×5.
+      Missing any normal orb ends the run.
+    science_concept: "Light scattering (Rayleigh); gravity; probability; eye cone/rod cells; hand-eye coordination"
+    curriculum_hook: "Why sunsets are orange/red; atmosphere as a lens"
+    post_game_tweaks:
+      - "Fall Speed slider"
+      - "Bomb Chance selector"
+    localStorage_key: null
+    difficulty_curve: fall_speed_increases_with_score
+    tags: [Light & Optics, Reflex]
+    store_category: "Education / Arcade"
+    content_rating: "Everyone"
+
+  - id: novaarc
+    file: games/novaarc.html
+    title: "Nova Arc"
+    emoji: "🚀"
+    genre: "TRAJECTORY SCIENCE · SKILL"
+    accent_color: "#f9d423"
+    bg: "linear-gradient(135deg,#030712,#0a1428)"
+    mechanic: >
+      Tap/click to thrust upward against gravity. Fly through gates, collect gems,
+      dodge hazards. Physics: real gravity pull + impulse thrust = parabolic arcs.
+      Post-game sliders let player adjust Gravity (0.4–2.2×), Thrust Power (0.5–1.8×),
+      and Obstacle Density.
+    science_concept: "Projectile motion; parabolic arcs; gravity; impulse; kinematic equations"
+    curriculum_hook: "How rockets thrust against gravity; why thrown objects curve"
+    post_game_tweaks:
+      - "Gravity (0.4× to 2.2×)"
+      - "Thrust Power (0.5× to 1.8×)"
+      - "Obstacle Density (low / medium / high)"
+    localStorage_key: nova_arc_best
+    difficulty_curve: obstacle_density_increases_with_score
+    color_palette:
+      gradient: "linear-gradient(135deg, #f9d423, #ff6b35, #f093fb)"
+      background: "#030712"
+    tags: [Projectile Motion, Skill]
+    store_category: "Education / Arcade"
+    content_rating: "Everyone"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ADDING A NEW GAME — Checklist for AI / Developer
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Create games/<id>.html
+#    - Add <meta name="game:*"> tags in <head> (id, title, emoji, genre, desc,
+#      tags, bg, accent) — the GitHub Action reads these to rebuild games.json
+#    - Add a fixed "← HOME" link back to ../index.html
+#    - Follow the design principles above
+# 2. Add an entry here in game-themes.yaml
+# 3. Push to GitHub — the Action (.github/workflows/update-games.yml) will
+#    auto-regenerate games.json and commit it
+# 4. index.html loads games.json at runtime — no HTML edits needed
+# 5. Add a store listing in store-listings.md
+# 6. Update manifest.json shortcuts if desired
+# ─────────────────────────────────────────────────────────────────────────────

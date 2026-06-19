@@ -306,78 +306,8 @@
   <h2 class="section-title">Pick Up &amp; Play in Seconds</h2>
   <p class="section-sub">Every game is a one-tap adventure packed with a real science lesson inside.</p>
 
-  <div class="games-grid">
-
-    <div class="game-card reveal">
-      <div class="game-thumb" style="background:linear-gradient(135deg,#040c18,#0a2040)">
-        <span>❄️</span>
-        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,rgba(0,229,255,.18),transparent 70%)"></div>
-      </div>
-      <div class="game-card-body">
-        <div class="game-name">Glacier Gauntlet</div>
-        <div class="game-genre" style="color:var(--cyan)">ICE SCIENCE · DODGE</div>
-        <div class="game-desc">Dodge falling ice blocks and catch crystals as your understanding of phase changes and latent heat grows with every run.</div>
-        <div class="game-tags">
-          <span class="tag tag-learn">PHASE CHANGE</span>
-          <span class="tag tag-reflex">REFLEXES</span>
-          <span class="tag tag-fun">FUN</span>
-        </div>
-        <a class="play-btn" href="games/glacier.html">▶ Play Now</a>
-      </div>
-    </div>
-
-    <div class="game-card reveal">
-      <div class="game-thumb" style="background:linear-gradient(135deg,#05030f,#160c2e)">
-        <span>🪐</span>
-        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(162,89,255,.18),transparent 70%)"></div>
-      </div>
-      <div class="game-card-body">
-        <div class="game-name">Orbit</div>
-        <div class="game-genre" style="color:var(--purple)">SPACE SCIENCE · TIMING</div>
-        <div class="game-desc">Reverse a ball's orbit to grab gems and avoid hazards — learning angular speed, circumference, and centripetal force along the way.</div>
-        <div class="game-tags">
-          <span class="tag tag-learn">ORBITAL MOTION</span>
-          <span class="tag tag-fun">TIMING</span>
-        </div>
-        <a class="play-btn" href="games/orbit.html">▶ Play Now</a>
-      </div>
-    </div>
-
-    <div class="game-card reveal">
-      <div class="game-thumb" style="background:linear-gradient(135deg,#0a0a1a,#1a0533)">
-        <span>🔥</span>
-        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 50%,rgba(196,113,237,.15),transparent 70%)"></div>
-      </div>
-      <div class="game-card-body">
-        <div class="game-name">Drop Stack 3D</div>
-        <div class="game-genre" style="color:var(--pink)">PHYSICS · PRECISION</div>
-        <div class="game-desc">Stack 3D blocks with precision combos, fever modes, and power-ups — while learning speed, acceleration, and margin of error.</div>
-        <div class="game-tags">
-          <span class="tag tag-physics">PHYSICS</span>
-          <span class="tag tag-reflex">PRECISION</span>
-          <span class="tag tag-fun">COMBO</span>
-        </div>
-        <a class="play-btn" href="games/dropstack.html">▶ Play Now</a>
-      </div>
-    </div>
-
-    <div class="game-card reveal">
-      <div class="game-thumb" style="background:linear-gradient(135deg,#0a0315,#1a0820)">
-        <span>🌅</span>
-        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 70%,rgba(255,107,53,.15),transparent 70%)"></div>
-      </div>
-      <div class="game-card-body">
-        <div class="game-name">Sunset Glow</div>
-        <div class="game-genre" style="color:var(--orange)">LIGHT SCIENCE · RHYTHM</div>
-        <div class="game-desc">Chase the light as the sun sets across a living sky — discovering why sunsets are red, how atmosphere scatters light, and more.</div>
-        <div class="game-tags">
-          <span class="tag tag-learn">LIGHT &amp; OPTICS</span>
-          <span class="tag tag-fun">RHYTHM</span>
-        </div>
-        <a class="play-btn" href="games/sunset.html">▶ Play Now</a>
-      </div>
-    </div>
-
+  <div id="games-grid" class="games-grid">
+    <!-- populated dynamically from games.json -->
   </div>
 </section>
 
@@ -397,11 +327,6 @@
       <span class="pillar-icon">🎮</span>
       <div class="pillar-title">Play-First Design</div>
       <div class="pillar-body">No lectures, no fill-in-the-blank. Just a fast, rewarding arcade loop that feels great — science sneaks in through the mechanics.</div>
-    </div>
-    <div class="pillar reveal">
-      <span class="pillar-icon">🚫</span>
-      <div class="pillar-title">Zero Ads, Zero IAP</div>
-      <div class="pillar-body">No ads. No in-app purchases. No dark patterns. KidSpark games are safe, clean, and completely focused on fun &amp; learning.</div>
     </div>
     <div class="pillar reveal">
       <span class="pillar-icon">📱</span>
@@ -636,6 +561,32 @@ requestAnimationFrame(drawHero);
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(()=>{});
 }
+
+/* ── Dynamic games loader ── */
+(async function loadGames(){
+  const grid = document.getElementById('games-grid');
+  let games;
+  try { games = await fetch('./games.json').then(r=>r.json()); }
+  catch(e){ grid.innerHTML='<p style="color:rgba(255,255,255,.4);text-align:center;grid-column:1/-1">Could not load games.</p>'; return; }
+
+  grid.innerHTML = games.map(g=>`
+    <div class="game-card reveal">
+      <div class="game-thumb" style="background:${g.bg}">
+        <span>${g.emoji}</span>
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 60%,${g.accent}30,transparent 70%)"></div>
+      </div>
+      <div class="game-card-body">
+        <div class="game-name">${g.title}</div>
+        <div class="game-genre" style="color:${g.accent}">${g.genre}</div>
+        <div class="game-desc">${g.desc}</div>
+        <div class="game-tags">${g.tags.map(t=>`<span class="tag tag-learn">${t.toUpperCase()}</span>`).join('')}</div>
+        <a class="play-btn" href="${g.file}">&#9654; Play Now</a>
+      </div>
+    </div>`).join('');
+
+  // observe newly added cards
+  grid.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+})();
 
 /* ── Scroll reveal ── */
 const reveals = document.querySelectorAll('.reveal');
